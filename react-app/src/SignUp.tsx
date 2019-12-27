@@ -49,7 +49,7 @@ const SignUp: FC<{ setAlert: SetAlert }> = ({ setAlert }) => {
     }
 
     try {
-      await registerMutation({ variables: { email, password } });
+      await registerMutation({ variables: { input: { email, password } } });
       setAlert({
         variant: 'success',
         messages: ['A Confirmation Link was sent to your Mail.'],

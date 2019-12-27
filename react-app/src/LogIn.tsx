@@ -1,14 +1,18 @@
 import React, { FC, useState } from 'react';
 import { useMutation } from '@apollo/react-hooks';
 import { Button, DialogContent, TextField } from '@material-ui/core';
+import { useStyles } from './Form.styles';
 
 import { LOGIN_MUTATION } from './Login.mutation';
 
 import { SetAlert } from './interfaces/Alert';
 
-import { useStyles } from './Form.styles';
+interface Props {
+  handleClose: ((event: {}, reason: 'backdropClick' | 'escapeKeyDown') => void) | undefined;
+  setAlert: SetAlert;
+}
 
-const LogIn: FC<{ setAlert: SetAlert }> = ({ setAlert }) => {
+const LogIn: FC<Props> = ({ setAlert, handleClose }) => {
   const [form, setForm] = useState({ email: '', password: '' });
   const [loginMutation] = useMutation(LOGIN_MUTATION);
   const classes = useStyles();
@@ -19,17 +23,20 @@ const LogIn: FC<{ setAlert: SetAlert }> = ({ setAlert }) => {
     setForm(prevState => ({ ...prevState, [name]: value }));
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
 
     const { email, password } = form;
 
     try {
-      loginMutation({ variables: { email, password } });
+      const resp = await loginMutation({ variables: { input: { email, password } } });
+      if (handleClose) {
+        handleClose({}, 'backdropClick');
+      }
     } catch (error) {
       setAlert({
         variant: 'error',
-        messages: [`Something went wrong. Error: ${error.message}`],
+        messages: [`Something went wrong.`],
         show: true
       });
     }

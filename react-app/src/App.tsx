@@ -12,10 +12,10 @@ import Dashboard from './Dashboard';
 import { AlertState } from './interfaces/Alert';
 
 // eslint-disable-next-line no-console
-console.log(process.env.GRAPHQL_API);
 
 export const client = new ApolloClient({
-  uri: process.env.GRAPHQL_API
+  uri: process.env.REACT_APP_GRAPHQL_API,
+  credentials: 'include'
 });
 
 const App: FC = props => {

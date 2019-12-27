@@ -113,9 +113,7 @@ export class AuthResolver {
   }
 
   @Query(() => MailResponse)
-  async resetPassword(
-    @Arg('input') { email }: AuthInput
-  ): Promise<MailResponse> {
+  async resetPassword(@Arg('email') email: string): Promise<MailResponse> {
     const user = await User.findOne({ email });
 
     if (!user) {

@@ -25,7 +25,7 @@ const NavBar: FC = () => {
   const handleClick = (selectedTab: number) => (): void => {
     setShowModal(prevState => ({ open: !prevState.open, selectedTab }));
   };
-  const handleClose = (): void => {
+  const handleClose = (event: {}, reason: 'backdropClick' | 'escapeKeyDown'): void | undefined => {
     setShowModal(prevState => ({ open: !prevState.open, selectedTab: null }));
   };
   const { open, selectedTab } = showModal;

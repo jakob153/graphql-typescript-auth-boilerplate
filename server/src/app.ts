@@ -10,6 +10,7 @@ import cookieParser from 'cookie-parser';
 
 import { AuthResolver } from './resolvers/AuthResolver';
 import { confirmAccount } from './confirmAccount';
+import { Context } from './types/Context';
 
 (async (): Promise<void> => {
   const app = express();
@@ -29,10 +30,14 @@ import { confirmAccount } from './confirmAccount';
     schema: await buildSchema({
       resolvers: [AuthResolver],
       validate: false
-    })
+    }),
+    context: ({ req, res }): Context => ({ req, res })
   });
 
-  apolloServer.applyMiddleware({ app, cors: false });
+  apolloServer.applyMiddleware({
+    app,
+    cors: { credentials: true, origin: true }
+  });
 
   app.listen(port, () => {
     // eslint-disable-next-line no-console

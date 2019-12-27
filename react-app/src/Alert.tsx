@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, Fragment } from 'react';
 import classnames from 'classnames';
 import { IconButton, SnackbarContent } from '@material-ui/core';
 import { makeStyles, Theme } from '@material-ui/core/styles';
@@ -56,7 +56,7 @@ const Alert: FC<Props> = ({ className, messages, onClose, variant }) => {
         <span className={classes.message}>
           <Icon className={classnames(classes.icon, classes.iconVariant)} />
           {messages.map(message => (
-            <>{message}</>
+            <Fragment key={message}>{message}</Fragment>
           ))}
         </span>
       }
