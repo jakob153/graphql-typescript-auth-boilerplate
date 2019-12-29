@@ -1,7 +1,10 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useState, useContext } from 'react';
 import { useMutation } from '@apollo/react-hooks';
-import { Button, DialogContent, TextField } from '@material-ui/core';
+import { Link as RouterLink } from 'react-router-dom';
+import { Button, DialogContent, Link, TextField } from '@material-ui/core';
 import { useStyles } from './Form.styles';
+
+import { UserContext } from './UserContext';
 
 import { LOGIN_MUTATION } from './Login.mutation';
 
@@ -12,9 +15,19 @@ interface Props {
   setAlert: SetAlert;
 }
 
+interface LoginResponse {
+  login: {
+    user: {
+      email: string;
+    };
+    errors: Array<{ path: string; message: string }>;
+  };
+}
+
 const LogIn: FC<Props> = ({ setAlert, handleClose }) => {
   const [form, setForm] = useState({ email: '', password: '' });
-  const [loginMutation] = useMutation(LOGIN_MUTATION);
+  const [loginMutation] = useMutation<LoginResponse>(LOGIN_MUTATION);
+  const { setUser } = useContext(UserContext);
   const classes = useStyles();
 
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
@@ -28,9 +41,20 @@ const LogIn: FC<Props> = ({ setAlert, handleClose }) => {
     const { email, password } = form;
 
     try {
-      await loginMutation({ variables: { input: { email, password } } });
-      if (handleClose) {
+      const response = await loginMutation({ variables: { input: { email, password } } });
+      console.log(response);
+      if (response.data?.login.errors) {
+        const errorMessages = response.data.login.errors.map(error => error.message);
+        setAlert({
+          variant: 'error',
+          messages: [...errorMessages],
+          show: true
+        });
+        return;
+      }
+      if (handleClose && response.data) {
         handleClose({}, 'backdropClick');
+        setUser({ email: response.data.login.user.email, loggedIn: true });
       }
     } catch (error) {
       setAlert({
@@ -70,6 +94,9 @@ const LogIn: FC<Props> = ({ setAlert, handleClose }) => {
           Log In
         </Button>
       </form>
+      <Link component={RouterLink} to="passwordForget">
+        Forgot Password?
+      </Link>
     </DialogContent>
   );
 };

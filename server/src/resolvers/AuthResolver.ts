@@ -4,6 +4,7 @@ import { Arg, Ctx, Mutation, Resolver, Query } from 'type-graphql';
 
 import { sendMail } from '../utils/sendMail';
 import { User } from '../entity/User';
+
 import { Context } from 'src/types/Context';
 import { AuthInput } from '../types/AuthInput';
 import { UserResponse } from '../types/UserResponse';
@@ -114,12 +115,43 @@ export class AuthResolver {
       expiresIn: '1d'
     });
 
+    const date = new Date();
+
     ctx.res.cookie('auth_token', authToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      expires: new Date(new Date().getMonth() + 1)
+      expires: new Date(date.setMonth(date.getMonth() + 1))
     });
 
+    return { user };
+  }
+
+  @Query(() => UserResponse)
+  async getCurrentUser(@Ctx() ctx: Context): Promise<UserResponse> {
+    const authToken = ctx.req.cookies['auth_token'];
+    if (!authToken) {
+      return {
+        errors: [
+          {
+            path: 'authToken',
+            message: 'No authToken'
+          }
+        ]
+      };
+    }
+    const decodedToken = jwt.verify(authToken, secret) as any;
+    const user = await User.findOne(decodedToken.sub);
+
+    if (!user) {
+      return {
+        errors: [
+          {
+            path: 'email',
+            message: 'User not found'
+          }
+        ]
+      };
+    }
     return { user };
   }
 
