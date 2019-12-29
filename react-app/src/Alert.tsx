@@ -1,9 +1,27 @@
-import React, { FC, Fragment } from 'react';
+import React, { FC } from 'react';
 import classnames from 'classnames';
-import { IconButton, SnackbarContent } from '@material-ui/core';
-import { makeStyles, Theme } from '@material-ui/core/styles';
+import {
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  IconButton,
+  SnackbarContent,
+  makeStyles,
+  withStyles,
+  createStyles,
+  Theme
+} from '@material-ui/core';
 import { CheckCircle, Close, Error, Info, Warning } from '@material-ui/icons';
 import { green, amber } from '@material-ui/core/colors';
+
+const ListItemIconCustom = withStyles((theme: Theme) =>
+  createStyles({
+    root: {
+      minWidth: '40px'
+    }
+  })
+)(ListItemIcon);
 
 const useStyles = makeStyles((theme: Theme) => ({
   success: {
@@ -18,16 +36,12 @@ const useStyles = makeStyles((theme: Theme) => ({
   warning: {
     backgroundColor: amber[700]
   },
-  icon: {
-    fontSize: 20
-  },
   iconVariant: {
     opacity: 0.9,
     marginRight: theme.spacing(1)
   },
-  message: {
-    display: 'flex',
-    alignItems: 'center'
+  color: {
+    color: 'white'
   }
 }));
 
@@ -41,7 +55,7 @@ export const variantIcon = {
 interface Props {
   className?: string;
   messages: Array<string>;
-  onClose?: () => void;
+  onClose?: (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   variant: keyof typeof variantIcon;
 }
 
@@ -51,20 +65,24 @@ const Alert: FC<Props> = ({ className, messages, onClose, variant }) => {
 
   return (
     <SnackbarContent
-      className={classnames(classes[variant], className)}
+      className={classnames(classes[variant], classes.color, className)}
       message={
-        <span className={classes.message}>
-          <Icon className={classnames(classes.icon, classes.iconVariant)} />
+        <List disablePadding dense>
           {messages.map(message => (
-            <Fragment key={message}>{message}</Fragment>
+            <ListItem key={message}>
+              <ListItemIconCustom>
+                <Icon className={classes.iconVariant} />
+              </ListItemIconCustom>
+              <ListItemText primary={message} />
+            </ListItem>
           ))}
-        </span>
+        </List>
       }
-      action={[
+      action={
         <IconButton onClick={onClose}>
-          <Close className={classes.icon} />
+          <Close />
         </IconButton>
-      ]}
+      }
     />
   );
 };

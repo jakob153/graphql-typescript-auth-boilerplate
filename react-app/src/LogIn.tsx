@@ -19,7 +19,6 @@ const LogIn: FC<Props> = ({ setAlert, handleClose }) => {
 
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     const { name, value } = event.target;
-
     setForm(prevState => ({ ...prevState, [name]: value }));
   };
 
@@ -29,14 +28,14 @@ const LogIn: FC<Props> = ({ setAlert, handleClose }) => {
     const { email, password } = form;
 
     try {
-      const resp = await loginMutation({ variables: { input: { email, password } } });
+      await loginMutation({ variables: { input: { email, password } } });
       if (handleClose) {
         handleClose({}, 'backdropClick');
       }
     } catch (error) {
       setAlert({
         variant: 'error',
-        messages: [`Something went wrong.`],
+        messages: [error.message],
         show: true
       });
     }

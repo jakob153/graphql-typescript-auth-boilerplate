@@ -8,7 +8,11 @@ import { REGISTER_MUTATION } from './Register.mutation';
 
 import { useStyles } from './Form.styles';
 
-const SignUp: FC<{ setAlert: SetAlert }> = ({ setAlert }) => {
+interface Props {
+  setAlert: SetAlert;
+}
+
+const SignUp: FC<Props> = ({ setAlert }) => {
   const [form, setForm] = useState({
     email: '',
     password: '',
@@ -56,9 +60,10 @@ const SignUp: FC<{ setAlert: SetAlert }> = ({ setAlert }) => {
         show: true
       });
     } catch (error) {
+      console.log(error);
       setAlert({
         variant: 'error',
-        messages: [error.response.data || error.message],
+        messages: [error.response?.data || error.message],
         show: true
       });
     }

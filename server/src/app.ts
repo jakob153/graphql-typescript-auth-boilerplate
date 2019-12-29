@@ -36,7 +36,7 @@ import { Context } from './types/Context';
 
   apolloServer.applyMiddleware({
     app,
-    cors: { credentials: true, origin: true }
+    cors: { credentials: true, origin: process.env.FRONTEND }
   });
 
   app.listen(port, () => {

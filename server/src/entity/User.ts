@@ -16,7 +16,7 @@ export class User extends BaseEntity {
   password: string;
 
   @Column({ nullable: true })
-  ipAddress: string;
+  ipAddress?: string;
 
   @Column({ default: false })
   verified: boolean;

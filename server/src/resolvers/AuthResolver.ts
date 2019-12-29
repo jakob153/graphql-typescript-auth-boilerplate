@@ -7,30 +7,34 @@ import { User } from '../entity/User';
 import { Context } from 'src/types/Context';
 import { AuthInput } from '../types/AuthInput';
 import { UserResponse } from '../types/UserResponse';
-import { MailResponse } from '../types/MailResponse';
+import { SuccessResponse } from '../types/SuccessResponse';
 
 interface JWTToken {
   sub: string;
 }
 
-const invalidLoginResponse = {
+interface InvalidLoginResponse {
+  errors: Array<{ path: string; message: string }>;
+}
+
+const invalidLoginResponse = (path = 'login'): InvalidLoginResponse => ({
   errors: [
     {
-      path: 'email',
+      path,
       message: 'invalid login'
     }
   ]
-};
+});
 
 const secret = process.env.SECRET as string;
 
 @Resolver()
 export class AuthResolver {
-  @Mutation(() => MailResponse)
+  @Mutation(() => SuccessResponse)
   async register(
     @Arg('input')
     { email, password }: AuthInput
-  ): Promise<MailResponse> {
+  ): Promise<SuccessResponse> {
     const hashedPassword = await bcrypt.hash(password, 12);
 
     const existingUser = await User.findOne({ email });
@@ -63,7 +67,7 @@ export class AuthResolver {
     };
 
     const contextData = {
-      host: `${process.env.BACKEND}/confirmAccount?emailToken=${emailToken}`
+      host: `${process.env.BACKEND}/accountConfirm?emailToken=${emailToken}`
     };
 
     try {
@@ -90,30 +94,37 @@ export class AuthResolver {
     const user = await User.findOne({ email });
 
     if (!user) {
-      return invalidLoginResponse;
+      return invalidLoginResponse('email');
     }
 
     if (!user.verified) {
-      return invalidLoginResponse;
+      return invalidLoginResponse('verified');
     }
 
     const valid = await bcrypt.compare(password, user.password);
 
     if (!valid) {
-      return invalidLoginResponse;
+      return invalidLoginResponse();
     }
+
+    user.ipAddress = ctx.req.connection.remoteAddress;
+    user.save();
 
     const authToken = jwt.sign({ sub: user.id }, secret, {
       expiresIn: '1d'
     });
 
-    ctx.res.cookie('auth_token', authToken, { httpOnly: true });
+    ctx.res.cookie('auth_token', authToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      expires: new Date(new Date().getMonth() + 1)
+    });
 
     return { user };
   }
 
-  @Query(() => MailResponse)
-  async resetPassword(@Arg('email') email: string): Promise<MailResponse> {
+  @Query(() => SuccessResponse)
+  async resetPassword(@Arg('email') email: string): Promise<SuccessResponse> {
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -121,7 +132,7 @@ export class AuthResolver {
         success: false,
         errors: [
           {
-            path: 'resetPassword',
+            path: 'email',
             message: 'User not found'
           }
         ]
@@ -159,11 +170,11 @@ export class AuthResolver {
     }
   }
 
-  @Mutation(() => MailResponse)
+  @Mutation(() => SuccessResponse)
   async resetPasswordConfirm(
     @Arg('password') password: string,
     @Ctx() ctx: Context
-  ): Promise<MailResponse> {
+  ): Promise<SuccessResponse> {
     const { sub } = jwt.verify(ctx.req.query.emailToken, secret) as JWTToken;
     const user = await User.findOne(sub);
 

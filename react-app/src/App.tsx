@@ -2,7 +2,15 @@ import React, { FC, useEffect, useState } from 'react';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import ApolloClient from 'apollo-boost';
 import { ApolloProvider } from '@apollo/react-hooks';
-import { Container } from '@material-ui/core';
+import {
+  Container,
+  CssBaseline,
+  MuiThemeProvider,
+  createMuiTheme,
+  makeStyles,
+  Theme
+} from '@material-ui/core';
+import { blue } from '@material-ui/core/colors';
 import qs from 'qs';
 
 import Alert from './Alert';
@@ -11,7 +19,19 @@ import Dashboard from './Dashboard';
 
 import { AlertState } from './interfaces/Alert';
 
-// eslint-disable-next-line no-console
+const theme = createMuiTheme({
+  palette: {
+    type: 'dark',
+    primary: blue,
+    secondary: blue
+  }
+});
+
+const useStyles = makeStyles((theme: Theme) => ({
+  marginTop4: {
+    marginTop: theme.spacing(4)
+  }
+}));
 
 export const client = new ApolloClient({
   uri: process.env.REACT_APP_GRAPHQL_API,
@@ -20,28 +40,45 @@ export const client = new ApolloClient({
 
 const App: FC = props => {
   const [alert, setAlert] = useState<AlertState>({ variant: 'info', messages: [], show: false });
+  const classes = useStyles();
 
   useEffect(() => {
-    const params = qs.parse(window.location.href);
-    if (params?.query) {
+    const params = qs.parse(window.location.search.replace('?', ''));
+    if (Object.entries(params).length) {
       setAlert({
-        variant: params.accountConfirm ? 'success' : 'error',
-        messages: [params.accountConfirm ? 'Account Confirmed! You can now log in.' : ''],
+        variant: params.accountConfirm === 'true' ? 'success' : 'error',
+        messages: [
+          params.accountConfirm === 'true'
+            ? 'Account Confirmed! You can now log in.'
+            : 'Something went wrong.'
+        ],
         show: true
       });
     }
   }, [props]);
 
+  const handleAlertClose = () => setAlert(prevState => ({ ...prevState, show: false }));
+
   return (
     <ApolloProvider client={client}>
       <BrowserRouter>
-        <Navbar />
-        <Container>
-          {alert.show && <Alert variant={alert.variant} messages={alert.messages} />}
-          <Switch>
-            <Route exact path="/dashboard" component={Dashboard} />
-          </Switch>
-        </Container>
+        <MuiThemeProvider theme={theme}>
+          <CssBaseline />
+          <Navbar />
+          <Container>
+            {alert.show && (
+              <Alert
+                className={classes.marginTop4}
+                variant={alert.variant}
+                messages={alert.messages}
+                onClose={handleAlertClose}
+              />
+            )}
+            <Switch>
+              <Route exact path="/dashboard" component={Dashboard} />
+            </Switch>
+          </Container>
+        </MuiThemeProvider>
       </BrowserRouter>
     </ApolloProvider>
   );
