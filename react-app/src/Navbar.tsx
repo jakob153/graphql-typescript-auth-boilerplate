@@ -1,5 +1,6 @@
 import React, { FC, useContext, useState } from 'react';
-import { AppBar, Box, Button, Toolbar, Typography } from '@material-ui/core';
+import { AppBar, Box, Button, Link, Toolbar, Typography } from '@material-ui/core';
+import { Link as RouterLink } from 'react-router-dom';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import AuthModal from './AuthModal';
 import { UserContext } from './UserContext';
@@ -38,7 +39,9 @@ const NavBar: FC = () => {
         <AppBar position="static">
           <Toolbar>
             <Typography variant="h6" className={classes.title}>
-              MyApp
+              <Link color="inherit" component={RouterLink} href="#" to="/" underline="none">
+                MyApp
+              </Link>
             </Typography>
             {!loggedIn && (
               <>

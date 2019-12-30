@@ -4,7 +4,6 @@ export const GET_CURRENT_USER_QUERY = gql`
   query getCurrentUser {
     getCurrentUser {
       user {
-        id
         email
       }
       errors {

@@ -51,22 +51,12 @@ const SignUp: FC<Props> = ({ setAlert }) => {
       setAlert({ variant: 'error', messages, show: true });
       return;
     }
-
-    try {
-      await registerMutation({ variables: { input: { email, password } } });
-      setAlert({
-        variant: 'success',
-        messages: ['A Confirmation Link was sent to your Mail.'],
-        show: true
-      });
-    } catch (error) {
-      console.log(error);
-      setAlert({
-        variant: 'error',
-        messages: [error.response?.data || error.message],
-        show: true
-      });
-    }
+    await registerMutation({ variables: { input: { email, password } } });
+    setAlert({
+      variant: 'success',
+      messages: ['A Confirmation Link was sent to your Mail.'],
+      show: true
+    });
   };
 
   return (
@@ -102,7 +92,7 @@ const SignUp: FC<Props> = ({ setAlert }) => {
           variant="filled"
           fullWidth
         />
-        <Button type="submit" fullWidth>
+        <Button type="submit" disabled={!(form.email && form.password && form.password2)} fullWidth>
           Sign Up
         </Button>
       </form>

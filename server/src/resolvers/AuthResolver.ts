@@ -9,6 +9,7 @@ import { Context } from 'src/types/Context';
 import { AuthInput } from '../types/AuthInput';
 import { UserResponse } from '../types/UserResponse';
 import { SuccessResponse } from '../types/SuccessResponse';
+import { DecodedToken } from '../types/DecodedToken';
 
 interface JWTToken {
   sub: string;
@@ -108,9 +109,6 @@ export class AuthResolver {
       return invalidLoginResponse();
     }
 
-    user.ipAddress = ctx.req.connection.remoteAddress;
-    user.save();
-
     const authToken = jwt.sign({ sub: user.id }, secret, {
       expiresIn: '1d'
     });
@@ -139,7 +137,7 @@ export class AuthResolver {
         ]
       };
     }
-    const decodedToken = jwt.verify(authToken, secret) as any;
+    const decodedToken = jwt.verify(authToken, secret) as DecodedToken;
     const user = await User.findOne(decodedToken.sub);
 
     if (!user) {
@@ -155,7 +153,7 @@ export class AuthResolver {
     return { user };
   }
 
-  @Query(() => SuccessResponse)
+  @Mutation(() => SuccessResponse)
   async resetPassword(@Arg('email') email: string): Promise<SuccessResponse> {
     const user = await User.findOne({ email });
 

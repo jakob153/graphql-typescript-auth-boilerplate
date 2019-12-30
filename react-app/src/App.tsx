@@ -1,5 +1,5 @@
-import React, { FC, useEffect, useState } from 'react';
-import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
+import React, { FC, useEffect, useState, ComponentType } from 'react';
+import { BrowserRouter, Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 import ApolloClient from 'apollo-boost';
 import { ApolloProvider } from '@apollo/react-hooks';
 import {
@@ -14,8 +14,9 @@ import { blue } from '@material-ui/core/colors';
 import qs from 'qs';
 
 import Alert from './Alert';
-import Navbar from './Navbar';
 import Dashboard from './Dashboard';
+import Main from './Main';
+import PasswordForget from './ResetPassword';
 
 import { UserContext } from './UserContext';
 
@@ -43,7 +44,7 @@ export const client = new ApolloClient({
 });
 
 interface PrivateRouteProps {
-  component: FC<any>;
+  component: ComponentType<RouteComponentProps<any>> | ComponentType<any>;
   exact: boolean;
   path: string;
 }
@@ -53,7 +54,7 @@ const App: FC = props => {
   const [user, setUser] = useState({ loggedIn: false, email: '' });
   const classes = useStyles();
 
-  const PrivateRoute = ({ component: Component, ...rest }: any) => (
+  const PrivateRoute: FC<PrivateRouteProps> = ({ component: Component, ...rest }) => (
     <Route
       {...rest}
       render={props => (user.loggedIn ? <Component {...props} /> : <Redirect to="/login" />)}
@@ -61,15 +62,11 @@ const App: FC = props => {
   );
 
   const getCurrentUser = async () => {
-    try {
-      const response = await client.query({ query: GET_CURRENT_USER_QUERY });
-      if (!response.data.getCurrentUser.user) {
-        return;
-      }
-      setUser({ email: response.data.getCurrentUser.user.email, loggedIn: true });
-    } catch (error) {
-      console.error(error);
+    const response = await client.query({ query: GET_CURRENT_USER_QUERY });
+    if (!response.data.getCurrentUser.user) {
+      return;
     }
+    setUser({ email: response.data.getCurrentUser.user.email, loggedIn: true });
   };
 
   useEffect(() => {
@@ -96,7 +93,6 @@ const App: FC = props => {
         <MuiThemeProvider theme={theme}>
           <CssBaseline />
           <UserContext.Provider value={{ user, setUser }}>
-            <Navbar />
             <Container>
               {alert.show && (
                 <Alert
@@ -107,7 +103,10 @@ const App: FC = props => {
                 />
               )}
               <Switch>
+                <Route exact path="/" component={Main} />
+                <Route exact path="/passwordForget" component={PasswordForget} />
                 <PrivateRoute exact path="/dashboard" component={Dashboard} />
+                <Redirect to="/" />
               </Switch>
             </Container>
           </UserContext.Provider>
