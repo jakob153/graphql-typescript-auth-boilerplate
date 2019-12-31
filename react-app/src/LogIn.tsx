@@ -41,25 +41,30 @@ const LogIn: FC<Props> = ({ setAlert, handleClose }) => {
 
     const { email, password } = form;
 
-    const response = await loginMutation({ variables: { input: { email, password } } });
-    if (response.data?.login.errors) {
-      const errorMessages = response.data.login.errors.map(error => error.message);
-      setAlert({
-        variant: 'error',
-        messages: [...errorMessages],
-        show: true
-      });
-      return;
-    }
-    if (handleClose && response.data) {
-      handleClose({}, 'backdropClick');
-      setUser({ email: response.data.login.user.email, loggedIn: true });
+    try {
+      const response = await loginMutation({ variables: { input: { email, password } } });
+      if (response.data?.login.errors) {
+        const errorMessages = response.data.login.errors.map(error => error.message);
+        setAlert({
+          variant: 'error',
+          messages: [...errorMessages],
+          show: true
+        });
+        return;
+      }
+      if (handleClose && response.data) {
+        handleClose({}, 'backdropClick');
+        setUser({ email: response.data.login.user.email, loggedIn: true });
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
     }
   };
 
   const handleResetPasswort = () => {
     handleClose && handleClose({}, 'backdropClick');
-    history.push('/passwordForget');
+    history.push('/resetPassword');
   };
 
   return (

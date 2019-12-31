@@ -37,18 +37,23 @@ const ResetPassword: FC<{ setAlert: SetAlert }> = ({ setAlert }) => {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
-    const response = await passwordReset({
-      variables: { email }
-    });
-    if (!response.data) {
-      return;
+    try {
+      const response = await passwordReset({
+        variables: { email }
+      });
+      if (!response.data) {
+        return;
+      }
+      const errorMessages = response.data.resetPassword.errors.map(error => error.message);
+      setAlert({
+        variant: 'success',
+        messages: errorMessages,
+        show: true
+      });
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
     }
-    const errorMessages = response.data.resetPassword.errors.map(error => error.message);
-    setAlert({
-      variant: 'success',
-      messages: errorMessages,
-      show: true
-    });
   };
 
   return (

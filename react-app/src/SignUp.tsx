@@ -51,12 +51,17 @@ const SignUp: FC<Props> = ({ setAlert }) => {
       setAlert({ variant: 'error', messages, show: true });
       return;
     }
-    await registerMutation({ variables: { input: { email, password } } });
-    setAlert({
-      variant: 'success',
-      messages: ['A Confirmation Link was sent to your Mail.'],
-      show: true
-    });
+    try {
+      await registerMutation({ variables: { input: { email, password } } });
+      setAlert({
+        variant: 'success',
+        messages: ['A Confirmation Link was sent to your Mail.'],
+        show: true
+      });
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+    }
   };
 
   return (

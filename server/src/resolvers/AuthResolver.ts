@@ -65,11 +65,11 @@ export class AuthResolver {
     const mail = {
       email: user.email,
       subject: 'Welcome to Blacklist',
-      templateFilename: 'accountConfirm'
+      templateFilename: 'confirmAccount'
     };
 
     const contextData = {
-      host: `${process.env.BACKEND}/accountConfirm?emailToken=${emailToken}`
+      host: `${process.env.BACKEND}/confirmAccount?emailToken=${emailToken}`
     };
 
     try {
@@ -176,12 +176,12 @@ export class AuthResolver {
     const mail = {
       email: user.email,
       subject: 'Reset Password',
-      templateFilename: 'passwordReset'
+      templateFilename: 'resetPassword'
     };
 
     const contextData = {
       emailToken,
-      host: process.env.FRONTEND as string
+      host: `${process.env.FRONTEND}/resetPasswordConfirm?emailToken=${emailToken}`
     };
 
     try {
@@ -202,11 +202,28 @@ export class AuthResolver {
 
   @Mutation(() => SuccessResponse)
   async resetPasswordConfirm(
-    @Arg('password') password: string,
+    @Arg('oldPassword') oldPassword: string,
+    @Arg('newPassword') newPassword: string,
     @Ctx() ctx: Context
   ): Promise<SuccessResponse> {
-    const { sub } = jwt.verify(ctx.req.query.emailToken, secret) as JWTToken;
-    const user = await User.findOne(sub);
+    const decodedToken = jwt.verify(
+      ctx.req.query.emailToken,
+      secret
+    ) as JWTToken;
+
+    if (!decodedToken) {
+      return {
+        success: false,
+        errors: [
+          {
+            path: 'resetPasswordConfirm',
+            message: 'Token expired'
+          }
+        ]
+      };
+    }
+
+    const user = await User.findOne(decodedToken.sub);
 
     if (!user) {
       return {
@@ -219,7 +236,21 @@ export class AuthResolver {
         ]
       };
     }
-    const hashedPassword = await bcrypt.hash(password, 12);
+    const valid = await bcrypt.compare(oldPassword, user.password);
+
+    if (!valid) {
+      return {
+        success: false,
+        errors: [
+          {
+            path: 'resetPasswordConfirm',
+            message: 'Invalid Operation'
+          }
+        ]
+      };
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
 
     user.password = hashedPassword;
     user.save();
