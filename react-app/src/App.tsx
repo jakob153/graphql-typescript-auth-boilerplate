@@ -66,7 +66,7 @@ const App: FC = props => {
       setUser({ email: response.data.getCurrentUser.user.email, loggedIn: true });
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error(error);
+      console.log(error.message);
     }
   };
 

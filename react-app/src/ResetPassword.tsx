@@ -41,13 +41,13 @@ const ResetPassword: FC<{ setAlert: SetAlert }> = ({ setAlert }) => {
       const response = await passwordReset({
         variables: { email }
       });
-      if (!response.data) {
-        return;
+      if (response.errors) {
+        const errorMessages = response.errors.map(error => error.message);
+        setAlert({ variant: 'error', messages: [...errorMessages], show: true });
       }
-      const errorMessages = response.data.resetPassword.errors.map(error => error.message);
       setAlert({
         variant: 'success',
-        messages: errorMessages,
+        messages: ['Mail was sent successfully'],
         show: true
       });
     } catch (error) {

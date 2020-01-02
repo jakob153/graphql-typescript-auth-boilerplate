@@ -43,8 +43,8 @@ const LogIn: FC<Props> = ({ setAlert, handleClose }) => {
 
     try {
       const response = await loginMutation({ variables: { input: { email, password } } });
-      if (response.data?.login.errors) {
-        const errorMessages = response.data.login.errors.map(error => error.message);
+      if (response.errors) {
+        const errorMessages = response.errors.map(error => error.message);
         setAlert({
           variant: 'error',
           messages: [...errorMessages],
