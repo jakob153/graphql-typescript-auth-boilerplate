@@ -1,5 +1,12 @@
 import React, { FC, useEffect, useState, ComponentType } from 'react';
-import { BrowserRouter, Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
+import {
+  BrowserRouter,
+  Redirect,
+  Route,
+  Switch,
+  RouteComponentProps,
+  RouteProps
+} from 'react-router-dom';
 import qs from 'qs';
 import ApolloClient from 'apollo-boost';
 import { ApolloProvider } from '@apollo/react-hooks';
@@ -37,10 +44,9 @@ interface GetCurrentUserResponse {
   };
 }
 
-interface PrivateRouteProps {
+interface PrivateRouteProps extends RouteProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   component: ComponentType<RouteComponentProps<any>> | ComponentType<any>;
-  exact: boolean;
-  path: string;
   condition: boolean;
 }
 
@@ -56,22 +62,22 @@ const App: FC = props => {
   );
 
   const getCurrentUser = async () => {
-    try {
-      const response = await client.query<GetCurrentUserResponse>({
-        query: GET_CURRENT_USER_QUERY
-      });
-      if (!response.data.getCurrentUser.user) {
-        return;
-      }
-      setUser({ email: response.data.getCurrentUser.user.email, loggedIn: true });
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log(error.message);
+    const response = await client.query<GetCurrentUserResponse>({
+      query: GET_CURRENT_USER_QUERY
+    });
+    if (!response.data.getCurrentUser.user) {
+      return;
     }
+    setUser({ email: response.data.getCurrentUser.user.email, loggedIn: true });
   };
 
   useEffect(() => {
-    getCurrentUser();
+    try {
+      getCurrentUser();
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+    }
   }, [props]);
 
   return (

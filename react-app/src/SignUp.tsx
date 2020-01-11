@@ -28,7 +28,7 @@ const SignUp: FC<Props> = ({ setAlert }) => {
 
   const validateForm = (password: string, password2: string) => {
     let formValid = true;
-    let messages = [];
+    const messages = [];
 
     if (password.length < 5) {
       formValid = false;
