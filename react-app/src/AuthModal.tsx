@@ -33,32 +33,30 @@ const AuthModal: FC<Props> = ({ open, handleClose, selectedTab }) => {
   const handleCloseAlert = () => setAlert(prevState => ({ ...prevState, show: false }));
 
   return (
-    <>
-      <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
-        <DialogTitle>
-          <Tabs value={tab} onChange={handleChange}>
-            <Tab label="Log In" />
-            <Tab label="Sign Up" />
-          </Tabs>
-        </DialogTitle>
-        {alert.show && (
-          <Alert
-            className={classes.marginTop2}
-            variant={alert.variant}
-            messages={alert.messages}
-            onClose={handleCloseAlert}
-          />
-        )}
-        {tab === 0 && <LogIn setAlert={setAlert} handleClose={handleClose} />}
-        {tab === 1 && <SignUp setAlert={setAlert} />}
-        <IconButton
-          className={classes.closeButton}
-          onClick={() => handleClose && handleClose({}, 'backdropClick')}
-        >
-          <Close />
-        </IconButton>
-      </Dialog>
-    </>
+    <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
+      <DialogTitle>
+        <Tabs value={tab} onChange={handleChange}>
+          <Tab label="Log In" />
+          <Tab label="Sign Up" />
+        </Tabs>
+      </DialogTitle>
+      {alert.show && (
+        <Alert
+          className={classes.marginTop2}
+          variant={alert.variant}
+          messages={alert.messages}
+          onClose={handleCloseAlert}
+        />
+      )}
+      {tab === 0 && <LogIn setAlert={setAlert} handleClose={handleClose} />}
+      {tab === 1 && <SignUp setAlert={setAlert} />}
+      <IconButton
+        className={classes.closeButton}
+        onClick={() => handleClose && handleClose({}, 'backdropClick')}
+      >
+        <Close />
+      </IconButton>
+    </Dialog>
   );
 };
 

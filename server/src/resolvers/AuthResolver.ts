@@ -16,6 +16,8 @@ import {
   UserInputError
 } from 'apollo-server-express';
 
+import { v4 as uuid } from 'uuid';
+
 const secret = process.env.SECRET as string;
 
 @Resolver()
@@ -34,13 +36,15 @@ export class AuthResolver {
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
+    const emailToken = uuid();
 
     const user = await User.create({
       email,
-      password: hashedPassword
+      password: hashedPassword,
+      emailToken
     }).save();
 
-    const emailToken = jwt.sign({ sub: user.id }, secret, {
+    const emailTokenEncoded = jwt.sign({ sub: emailToken }, secret, {
       expiresIn: '15m'
     });
 
@@ -51,7 +55,7 @@ export class AuthResolver {
     };
 
     const contextData = {
-      host: `${process.env.BACKEND}/confirmAccount?emailToken=${emailToken}`
+      host: `${process.env.BACKEND}/confirmAccount?emailToken=${emailTokenEncoded}`
     };
 
     try {
@@ -126,7 +130,12 @@ export class AuthResolver {
       throw new UserInputError('User not found');
     }
 
-    const emailToken = jwt.sign({ sub: user.id }, secret, {
+    const newEmailToken = uuid();
+
+    user.emailToken = newEmailToken;
+    user.save();
+
+    const emailToken= jwt.sign({ sub: newEmailToken }, secret, {
       expiresIn: '15m'
     });
 
@@ -137,7 +146,6 @@ export class AuthResolver {
     };
 
     const contextData = {
-      emailToken,
       host: `${process.env.FRONTEND}/resetPasswordConfirm?emailToken=${emailToken}`
     };
 
