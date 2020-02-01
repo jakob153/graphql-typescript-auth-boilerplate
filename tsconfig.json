@@ -8,6 +8,13 @@
       "es2017",
       "esnext.asynciterable"
     ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "jsx": "react",
+    "noEmit": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "isolatedModules": true,
     "sourceMap": true,
     "outDir": "./dist",
     "moduleResolution": "node",

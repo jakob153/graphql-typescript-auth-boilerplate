@@ -1,7 +1,3 @@
-require('dotenv').config({
-  path: `./.env.${process.env.NODE_ENV}`
-});
-
 import express from 'express';
 import { createConnection, getConnectionOptions } from 'typeorm';
 import { ApolloServer } from 'apollo-server-express';
@@ -12,15 +8,17 @@ import { AuthResolver } from './resolvers/AuthResolver';
 import { confirmAccount } from './confirmAccount';
 import { Context } from './types/Context';
 
+require('dotenv').config({
+  path: `./.env.${process.env.NODE_ENV}`
+});
+
 (async (): Promise<void> => {
   const app = express();
   app.use(cookieParser());
   app.get('/confirmAccount', confirmAccount);
 
   // get options from ormconfig.js
-  const dbOptions = await getConnectionOptions(
-    process.env.NODE_ENV || 'development'
-  );
+  const dbOptions = await getConnectionOptions(process.env.NODE_ENV || 'development');
 
   await createConnection({ ...dbOptions, name: 'default' });
 

@@ -5,16 +5,12 @@ import { Arg, Ctx, Mutation, Resolver, Query } from 'type-graphql';
 import { sendMail } from '../utils/sendMail';
 import { User } from '../entity/User';
 
-import { Context } from 'src/types/Context';
+import { Context } from '../types/Context';
 import { AuthInput } from '../types/AuthInput';
 import { UserResponse } from '../types/UserResponse';
 import { SuccessResponse } from '../types/SuccessResponse';
 import { DecodedToken } from '../types/DecodedToken';
-import {
-  ApolloError,
-  AuthenticationError,
-  UserInputError
-} from 'apollo-server-express';
+import { ApolloError, AuthenticationError, UserInputError } from 'apollo-server-express';
 
 import { v4 as uuid } from 'uuid';
 
@@ -62,9 +58,7 @@ export class AuthResolver {
       await sendMail(mail, contextData);
       return { success: true };
     } catch (error) {
-      throw new ApolloError(
-        `Someting went wrong while sending an email. Error: ${error.message}`
-      );
+      throw new ApolloError(`Someting went wrong while sending an email. Error: ${error.message}`);
     }
   }
 
@@ -135,7 +129,7 @@ export class AuthResolver {
     user.emailToken = newEmailToken;
     user.save();
 
-    const emailToken= jwt.sign({ sub: newEmailToken }, secret, {
+    const emailToken = jwt.sign({ sub: newEmailToken }, secret, {
       expiresIn: '15m'
     });
 
@@ -153,9 +147,7 @@ export class AuthResolver {
       await sendMail(mail, contextData);
       return { success: true };
     } catch (error) {
-      throw new ApolloError(
-        `Something went wrong while sending the mail. Error: ${error.message}`
-      );
+      throw new ApolloError(`Something went wrong while sending the mail. Error: ${error.message}`);
     }
   }
 
@@ -165,10 +157,7 @@ export class AuthResolver {
     @Arg('newPassword') newPassword: string,
     @Ctx() ctx: Context
   ): Promise<SuccessResponse> {
-    const decodedToken = jwt.verify(
-      ctx.req.query.emailToken,
-      secret
-    ) as DecodedToken;
+    const decodedToken = jwt.verify(ctx.req.query.emailToken, secret) as DecodedToken;
 
     if (!decodedToken) {
       throw new ApolloError('Token expired/not Found');
