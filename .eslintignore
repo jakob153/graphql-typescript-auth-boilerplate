@@ -1,0 +1,8 @@
+# Third party
+**/node_modules
+
+# Build
+build/
+dist/
+coverage/
+fixtures/

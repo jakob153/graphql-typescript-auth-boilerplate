@@ -7,10 +7,7 @@ interface JWTToken {
   sub: string;
 }
 
-export const confirmAccount = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const confirmAccount = async (req: Request, res: Response): Promise<void> => {
   const { emailToken } = req.query;
   const secret = process.env.SECRET as string;
   const { sub } = jwt.verify(emailToken, secret) as JWTToken;

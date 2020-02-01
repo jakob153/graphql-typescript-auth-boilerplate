@@ -62,13 +62,18 @@ const App: FC = props => {
   );
 
   const getCurrentUser = async () => {
-    const response = await client.query<GetCurrentUserResponse>({
-      query: GET_CURRENT_USER_QUERY
-    });
-    if (!response.data.getCurrentUser.user) {
-      return;
+    try {
+      const response = await client.query<GetCurrentUserResponse>({
+        query: GET_CURRENT_USER_QUERY
+      });
+      if (!response.data.getCurrentUser.user) {
+        return;
+      }
+      setUser({ email: response.data.getCurrentUser.user.email, loggedIn: true });
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
     }
-    setUser({ email: response.data.getCurrentUser.user.email, loggedIn: true });
   };
 
   useEffect(() => {
