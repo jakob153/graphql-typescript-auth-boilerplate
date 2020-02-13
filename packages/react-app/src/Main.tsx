@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, FC } from 'react';
 import { makeStyles, Theme } from '@material-ui/core';
 import Navbar from './Navbar';
 import qs from 'qs';
@@ -6,6 +6,7 @@ import qs from 'qs';
 import Alert from './Alert';
 
 import { AlertState } from './interfaces/Alert';
+import { RouteChildrenProps } from 'react-router-dom';
 
 const useStyles = makeStyles((theme: Theme) => ({
   marginTop4: {
@@ -13,7 +14,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   }
 }));
 
-const Main = () => {
+const Main: FC<RouteChildrenProps> = ({ history }) => {
   const [alert, setAlert] = useState<AlertState>({ variant: 'info', messages: [], show: false });
   const classes = useStyles();
 
@@ -33,7 +34,10 @@ const Main = () => {
     }
   }, []);
 
-  const handleAlertClose = () => setAlert(prevState => ({ ...prevState, show: false }));
+  const handleAlertClose = () => {
+    history.push(history.location.pathname);
+    setAlert(prevState => ({ ...prevState, show: false }));
+  };
 
   return (
     <>

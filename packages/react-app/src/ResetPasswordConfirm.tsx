@@ -1,6 +1,8 @@
 import React, { FC, useState } from 'react';
 import { Button, Paper, TextField, makeStyles, Theme } from '@material-ui/core';
 import { useMutation } from '@apollo/react-hooks';
+import { RouteChildrenProps } from 'react-router-dom';
+import qs from 'qs';
 
 import { RESET_PASSWORD_CONFIRM_MUTATION } from './ResetPasswordConfirm.mutation';
 
@@ -17,7 +19,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   }
 }));
 
-const ResetPasswordConfirm: FC = () => {
+const ResetPasswordConfirm: FC<RouteChildrenProps> = ({ location }) => {
   const [form, setForm] = useState({ oldPassword: '', newPassword: '', newPassword2: '' });
   const classes = useStyles();
   const [resetPasswordConfirm] = useMutation(RESET_PASSWORD_CONFIRM_MUTATION);
@@ -30,8 +32,10 @@ const ResetPasswordConfirm: FC = () => {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const { oldPassword, newPassword } = form;
+    const { emailToken } = qs.parse(location.search, { ignoreQueryPrefix: true });
+
     try {
-      resetPasswordConfirm({ variables: { oldPassword, newPassword } });
+      resetPasswordConfirm({ variables: { oldPassword, newPassword, emailToken } });
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(error);

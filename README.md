@@ -1,5 +1,11 @@
-# Login & Registration Template
+# JWT-Authentication Template
 
-## Technolgies
+## Technologies
 
-Apollo, GraphQL, React, TypeORM, type-grapqhl, JWT, SQLite
+* Apollo
+* GraphQL
+* React
+* TypeORM
+* type-grapqhl
+* JWT Token
+* SQLite/Postgres

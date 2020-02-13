@@ -36,7 +36,7 @@ const LogIn: FC<Props> = ({ setAlert, handleClose }) => {
     setForm(prevState => ({ ...prevState, [name]: value }));
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const { email, password } = form;

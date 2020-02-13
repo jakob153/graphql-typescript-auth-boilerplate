@@ -21,7 +21,7 @@ const SignUp: FC<Props> = ({ setAlert }) => {
   const classes = useStyles();
   const [registerMutation] = useMutation(REGISTER_MUTATION);
 
-  const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>): void => {
+  const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     const { name, value } = event.target;
     setForm(prevState => ({ ...prevState, [name]: value }));
   };

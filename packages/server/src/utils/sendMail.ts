@@ -12,7 +12,7 @@ interface ContextData {
   host?: string;
 }
 
-export const sendMail = async (mail: Mail, contextData: ContextData): Promise<boolean> => {
+export const sendMail = async (mail: Mail, contextData: ContextData) => {
   const { email, subject, templateFilename } = mail;
 
   const account = await nodemailer.createTestAccount();

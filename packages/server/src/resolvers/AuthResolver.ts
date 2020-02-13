@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import { Arg, Ctx, Mutation, Resolver, Query } from 'type-graphql';
+import { Arg, Ctx, Mutation, Resolver, Query, UseMiddleware } from 'type-graphql';
 
 import { sendMail } from '../utils/sendMail';
 import { User } from '../entity/User';
@@ -9,10 +9,10 @@ import { Context } from '../types/Context';
 import { AuthInput } from '../types/AuthInput';
 import { UserResponse } from '../types/UserResponse';
 import { SuccessResponse } from '../types/SuccessResponse';
-import { DecodedToken } from '../types/DecodedToken';
-import { ApolloError, AuthenticationError, UserInputError } from 'apollo-server-express';
+import { ApolloError, UserInputError } from 'apollo-server-express';
 
 import { v4 as uuid } from 'uuid';
+import { verifyToken } from '../middlewares/verifyToken';
 
 const secret = process.env.SECRET as string;
 
@@ -22,7 +22,7 @@ export class AuthResolver {
   async register(
     @Arg('input')
     { email, password }: AuthInput
-  ): Promise<SuccessResponse> {
+  ) {
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
@@ -40,7 +40,7 @@ export class AuthResolver {
       emailToken
     }).save();
 
-    const emailTokenEncoded = jwt.sign({ sub: emailToken }, secret, {
+    const emailTokenEncoded = jwt.sign({ emailToken }, secret, {
       expiresIn: '15m'
     });
 
@@ -51,7 +51,7 @@ export class AuthResolver {
     };
 
     const contextData = {
-      host: `${process.env.BACKEND}/confirmAccount?emailToken=${emailTokenEncoded}`
+      host: `${process.env.SERVER}/confirmAccount?emailToken=${emailTokenEncoded}`
     };
 
     try {
@@ -63,10 +63,7 @@ export class AuthResolver {
   }
 
   @Mutation(() => UserResponse)
-  async login(
-    @Arg('input') { email, password }: AuthInput,
-    @Ctx() ctx: Context
-  ): Promise<UserResponse> {
+  async login(@Arg('input') { email, password }: AuthInput, @Ctx() ctx: Context) {
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -98,17 +95,17 @@ export class AuthResolver {
     return { user };
   }
 
+  @Mutation(() => SuccessResponse)
+  async logout(@Ctx() ctx: Context) {
+    ctx.res.clearCookie('auth_token');
+
+    return { success: true };
+  }
+
   @Query(() => UserResponse)
-  async getCurrentUser(@Ctx() ctx: Context): Promise<UserResponse> {
-    const authToken = ctx.req.cookies['auth_token'];
-    if (!authToken) {
-      throw new ApolloError('No Auth_Token Found');
-    }
-    const decodedToken = jwt.verify(authToken, secret) as DecodedToken;
-    if (!decodedToken.sub) {
-      throw new AuthenticationError('Token expired');
-    }
-    const user = await User.findOne(decodedToken.sub);
+  @UseMiddleware(verifyToken)
+  async getCurrentUser(@Ctx() ctx: Context) {
+    const user = await User.findOne(ctx.req.userId);
 
     if (!user) {
       throw new ApolloError('User not found');
@@ -117,7 +114,7 @@ export class AuthResolver {
   }
 
   @Mutation(() => SuccessResponse)
-  async resetPassword(@Arg('email') email: string): Promise<SuccessResponse> {
+  async resetPassword(@Arg('email') email: string) {
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -155,15 +152,10 @@ export class AuthResolver {
   async resetPasswordConfirm(
     @Arg('oldPassword') oldPassword: string,
     @Arg('newPassword') newPassword: string,
-    @Ctx() ctx: Context
-  ): Promise<SuccessResponse> {
-    const decodedToken = jwt.verify(ctx.req.query.emailToken, secret) as DecodedToken;
-
-    if (!decodedToken) {
-      throw new ApolloError('Token expired/not Found');
-    }
-
-    const user = await User.findOne(decodedToken.sub);
+    @Arg('emailToken') emailToken: string
+  ) {
+    const emailTokenDecoded = jwt.sign(emailToken, secret);
+    const user = await User.findOne({ where: { emailToken: emailTokenDecoded } });
 
     if (!user) {
       throw new ApolloError('User not found');

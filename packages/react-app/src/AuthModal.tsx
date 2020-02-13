@@ -29,7 +29,7 @@ const AuthModal: FC<Props> = ({ open, handleClose, selectedTab }) => {
   const [alert, setAlert] = useState<AlertState>({ variant: 'info', messages: [], show: false });
   const classes = useStyles();
 
-  const handleChange = (event: React.ChangeEvent<{}>, newValue: number): void => setTab(newValue);
+  const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => setTab(newValue);
   const handleCloseAlert = () => setAlert(prevState => ({ ...prevState, show: false }));
 
   return (

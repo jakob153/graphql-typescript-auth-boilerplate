@@ -5,7 +5,7 @@ import { verifyToken } from '../middlewares/verifyToken';
 export class BookResolver {
   @Query(() => String)
   @UseMiddleware(verifyToken)
-  book(): string {
+  book() {
     return 'The Republic';
   }
 }

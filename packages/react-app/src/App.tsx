@@ -52,7 +52,7 @@ interface PrivateRouteProps extends RouteProps {
 
 const App: FC = props => {
   const [user, setUser] = useState({ loggedIn: false, email: '' });
-  const params = qs.parse(window.location.search.replace('?', ''));
+  const params = qs.parse(window.location.search, { ignoreQueryPrefix: true });
 
   const PrivateRoute: FC<PrivateRouteProps> = ({ component: Component, condition, ...rest }) => (
     <Route
@@ -72,7 +72,7 @@ const App: FC = props => {
       setUser({ email: response.data.getCurrentUser.user.email, loggedIn: true });
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error(error);
+      console.log('No Auth Token Found');
     }
   };
 
@@ -98,7 +98,7 @@ const App: FC = props => {
                 <PrivateRoute
                   exact
                   path="/dashboard"
-                  condition={!!Object.entries(user).length}
+                  condition={user.loggedIn}
                   component={Dashboard}
                 />
                 <PrivateRoute

@@ -1,20 +1,19 @@
-import express from 'express';
-import { createConnection, getConnectionOptions } from 'typeorm';
-import { ApolloServer } from 'apollo-server-express';
-import { buildSchema } from 'type-graphql';
-import cookieParser from 'cookie-parser';
-
-import { AuthResolver } from './resolvers/AuthResolver';
-import { confirmAccount } from './confirmAccount';
-import { Context } from './types/Context';
-
+/* eslint-disable import/first */
 require('dotenv').config({
   path: `./.env.${process.env.NODE_ENV}`
 });
 
-(async (): Promise<void> => {
+import express from 'express';
+import { createConnection, getConnectionOptions } from 'typeorm';
+
+import { ApolloServer } from 'apollo-server-express';
+import { buildSchema } from 'type-graphql';
+
+import { AuthResolver } from './resolvers/AuthResolver';
+import { confirmAccount } from './confirmAccount';
+
+(async () => {
   const app = express();
-  app.use(cookieParser());
   app.get('/confirmAccount', confirmAccount);
 
   // get options from ormconfig.js
@@ -29,7 +28,7 @@ require('dotenv').config({
       resolvers: [AuthResolver],
       validate: false
     }),
-    context: ({ req, res }): Context => ({ req, res })
+    context: ({ req, res }) => ({ req, res })
   });
 
   apolloServer.applyMiddleware({

@@ -2,16 +2,13 @@ import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 
 import { User } from './entity/User';
+import { DecodedToken } from './types/DecodedToken';
 
-interface JWTToken {
-  sub: string;
-}
-
-export const confirmAccount = async (req: Request, res: Response): Promise<void> => {
-  const { emailToken } = req.query;
+export const confirmAccount = async (req: Request, res: Response) => {
+  const { emailToken: encodedEmailToken } = req.query;
   const secret = process.env.SECRET as string;
-  const { sub } = jwt.verify(emailToken, secret) as JWTToken;
-  const user = await User.findOne(sub);
+  const { sub: emailToken } = jwt.verify(encodedEmailToken, secret) as DecodedToken;
+  const user = await User.findOne(emailToken);
 
   if (!user) {
     return res.redirect(`${process.env.FRONTEND}?confirmAccount=false`);

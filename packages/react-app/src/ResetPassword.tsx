@@ -35,7 +35,7 @@ const ResetPassword: FC<{ setAlert: SetAlert }> = ({ setAlert }) => {
     setEmail(event.target.value);
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
       const response = await passwordReset({

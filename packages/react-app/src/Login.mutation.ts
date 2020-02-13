@@ -6,10 +6,6 @@ export const LOGIN_MUTATION = gql`
       user {
         email
       }
-      errors {
-        path
-        message
-      }
     }
   }
 `;
