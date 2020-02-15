@@ -11,9 +11,9 @@ export const confirmAccount = async (req: Request, res: Response) => {
   const user = await User.findOne(emailToken);
 
   if (!user) {
-    return res.redirect(`${process.env.FRONTEND}?confirmAccount=false`);
+    return res.redirect(`${process.env.REACT_APP}?confirmAccount=false`);
   }
   user.verified = true;
   user.save();
-  return res.redirect(`${process.env.FRONTEND}?confirmAccount=true`);
+  return res.redirect(`${process.env.REACT_APP}?confirmAccount=true`);
 };

@@ -9,7 +9,7 @@ import { Context } from '../types/Context';
 import { AuthInput } from '../types/AuthInput';
 import { UserResponse } from '../types/UserResponse';
 import { SuccessResponse } from '../types/SuccessResponse';
-import { ApolloError, UserInputError } from 'apollo-server-express';
+import { ApolloError, UserInputError, AuthenticationError } from 'apollo-server-express';
 
 import { v4 as uuid } from 'uuid';
 import { verifyToken } from '../middlewares/verifyToken';
@@ -71,7 +71,7 @@ export class AuthResolver {
     }
 
     if (!user.verified) {
-      throw new ApolloError('User not verified');
+      throw new AuthenticationError('User not verified');
     }
 
     const valid = await bcrypt.compare(password, user.password);
@@ -108,7 +108,7 @@ export class AuthResolver {
     const user = await User.findOne(ctx.req.userId);
 
     if (!user) {
-      throw new ApolloError('User not found');
+      throw new AuthenticationError('User not found');
     }
     return { user };
   }
@@ -137,7 +137,7 @@ export class AuthResolver {
     };
 
     const contextData = {
-      host: `${process.env.FRONTEND}/resetPasswordConfirm?emailToken=${emailToken}`
+      host: `${process.env.REACT_APP}/resetPasswordConfirm?emailToken=${emailToken}`
     };
 
     try {
@@ -158,12 +158,12 @@ export class AuthResolver {
     const user = await User.findOne({ where: { emailToken: emailTokenDecoded } });
 
     if (!user) {
-      throw new ApolloError('User not found');
+      throw new AuthenticationError('User not found');
     }
     const valid = await bcrypt.compare(oldPassword, user.password);
 
     if (!valid) {
-      throw new ApolloError('User not valid');
+      throw new AuthenticationError('Old Password invalid');
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 12);

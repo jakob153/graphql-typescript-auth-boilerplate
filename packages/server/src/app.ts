@@ -33,7 +33,7 @@ import { confirmAccount } from './confirmAccount';
 
   apolloServer.applyMiddleware({
     app,
-    cors: { credentials: true, origin: process.env.FRONTEND }
+    cors: { credentials: true, origin: process.env.REACT_APP }
   });
 
   app.listen(port, () => {
