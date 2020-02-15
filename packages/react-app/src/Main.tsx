@@ -1,5 +1,5 @@
 import React, { useEffect, useState, FC } from 'react';
-import { makeStyles, Theme } from '@material-ui/core';
+import { Container, makeStyles, Theme } from '@material-ui/core';
 import Navbar from './Navbar';
 import qs from 'qs';
 
@@ -42,15 +42,17 @@ const Main: FC<RouteChildrenProps> = ({ history }) => {
   return (
     <>
       <Navbar />
-      {alert.show && (
-        <Alert
-          className={classes.marginTop4}
-          variant={alert.variant}
-          messages={alert.messages}
-          onClose={handleAlertClose}
-        />
-      )}
-      <h5>MAIN PAGE</h5>
+      <Container>
+        {alert.show && (
+          <Alert
+            className={classes.marginTop4}
+            variant={alert.variant}
+            messages={alert.messages}
+            onClose={handleAlertClose}
+          />
+        )}
+        <h5>MAIN PAGE</h5>
+      </Container>
     </>
   );
 };

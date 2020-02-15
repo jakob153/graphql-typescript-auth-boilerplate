@@ -75,7 +75,7 @@ const App: FC = () => {
       });
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.log('No Auth Token Found');
+      console.log(error);
     }
   };
 
@@ -89,25 +89,23 @@ const App: FC = () => {
         <MuiThemeProvider theme={theme}>
           <CssBaseline />
           <UserContext.Provider value={{ user, setUser }}>
-            <Container>
-              <Switch>
-                <Route exact path="/" component={Main} />
-                <Route exact path="/resetPassword" component={ResetPassword} />
-                <PrivateRoute
-                  exact
-                  path="/dashboard"
-                  condition={user.loggedIn}
-                  component={Dashboard}
-                />
-                <PrivateRoute
-                  exact
-                  path="/resetPasswordConfirm"
-                  condition={!!params?.emailToken}
-                  component={ResetPasswordConfirm}
-                />
-                <Redirect to="/" />
-              </Switch>
-            </Container>
+            <Switch>
+              <Route exact path="/" component={Main} />
+              <Route exact path="/resetPassword" component={ResetPassword} />
+              <PrivateRoute
+                exact
+                path="/dashboard"
+                condition={user.loggedIn}
+                component={Dashboard}
+              />
+              <PrivateRoute
+                exact
+                path="/resetPasswordConfirm"
+                condition={!!params?.emailToken}
+                component={ResetPasswordConfirm}
+              />
+              <Redirect to="/" />
+            </Switch>
           </UserContext.Provider>
         </MuiThemeProvider>
       </BrowserRouter>

@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react';
-import { Button, Paper, TextField, makeStyles, Theme } from '@material-ui/core';
+import { Button, Container, Paper, TextField, makeStyles, Theme } from '@material-ui/core';
 import { useMutation } from '@apollo/react-hooks';
 
 import { RESET_PASSWORD_MUTATION } from './ResetPassword.mutation';
@@ -57,23 +57,25 @@ const ResetPassword: FC<{ setAlert: SetAlert }> = ({ setAlert }) => {
   };
 
   return (
-    <Paper className={classes.paper}>
-      <form onSubmit={handleSubmit}>
-        <TextField
-          name="email"
-          className={classes.marginBottom2}
-          label="Email"
-          type="email"
-          onChange={handleChange}
-          value={email}
-          variant="filled"
-          fullWidth
-        />
-        <Button type="submit" fullWidth>
-          Reset Password
-        </Button>
-      </form>
-    </Paper>
+    <Container>
+      <Paper className={classes.paper}>
+        <form onSubmit={handleSubmit}>
+          <TextField
+            name="email"
+            className={classes.marginBottom2}
+            label="Email"
+            type="email"
+            onChange={handleChange}
+            value={email}
+            variant="filled"
+            fullWidth
+          />
+          <Button type="submit" fullWidth>
+            Reset Password
+          </Button>
+        </form>
+      </Paper>
+    </Container>
   );
 };
 
