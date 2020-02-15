@@ -4,7 +4,7 @@ import { useMutation } from '@apollo/react-hooks';
 
 import { SetAlert } from './interfaces/Alert';
 
-import { REGISTER_MUTATION } from './Register.mutation';
+import { SIGNUP_MUTATION } from './SignUp.mutation';
 
 import { useStyles } from './Form.styles';
 
@@ -19,7 +19,7 @@ const SignUp: FC<Props> = ({ setAlert }) => {
     password2: ''
   });
   const classes = useStyles();
-  const [registerMutation] = useMutation(REGISTER_MUTATION);
+  const [signUpMutation] = useMutation(SIGNUP_MUTATION);
 
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -52,7 +52,7 @@ const SignUp: FC<Props> = ({ setAlert }) => {
       return;
     }
     try {
-      await registerMutation({ variables: { input: { email, password } } });
+      await signUpMutation({ variables: { input: { email, password } } });
       setAlert({
         variant: 'success',
         messages: ['A Confirmation Link was sent to your Mail.'],
@@ -76,6 +76,7 @@ const SignUp: FC<Props> = ({ setAlert }) => {
           value={form.email}
           variant="filled"
           fullWidth
+          required
         />
         <TextField
           name="password"
@@ -86,6 +87,7 @@ const SignUp: FC<Props> = ({ setAlert }) => {
           value={form.password}
           variant="filled"
           fullWidth
+          required
         />
         <TextField
           name="password2"
@@ -96,6 +98,7 @@ const SignUp: FC<Props> = ({ setAlert }) => {
           value={form.password2}
           variant="filled"
           fullWidth
+          required
         />
         <Button type="submit" disabled={!(form.email && form.password && form.password2)} fullWidth>
           Sign Up

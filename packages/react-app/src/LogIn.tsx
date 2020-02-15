@@ -6,7 +6,7 @@ import { useStyles } from './Form.styles';
 
 import { UserContext } from './UserContext';
 
-import { LOGIN_MUTATION } from './Login.mutation';
+import { LOGIN_MUTATION } from './LogIn.mutation';
 
 import { SetAlert } from './interfaces/Alert';
 
@@ -26,7 +26,7 @@ interface LoginResponse {
 
 const LogIn: FC<Props> = ({ setAlert, handleClose }) => {
   const [form, setForm] = useState({ email: '', password: '' });
-  const [loginMutation] = useMutation<LoginResponse>(LOGIN_MUTATION);
+  const [logInMutation] = useMutation<LoginResponse>(LOGIN_MUTATION);
   const { setUser } = useContext(UserContext);
   const history = useHistory();
   const classes = useStyles();
@@ -42,7 +42,7 @@ const LogIn: FC<Props> = ({ setAlert, handleClose }) => {
     const { email, password } = form;
 
     try {
-      const response = await loginMutation({ variables: { input: { email, password } } });
+      const response = await logInMutation({ variables: { input: { email, password } } });
       if (response.errors) {
         const errorMessages = response.errors.map(error => error.message);
         setAlert({

@@ -29,7 +29,7 @@ interface ResetPasswordResponse {
 const ResetPassword: FC<{ setAlert: SetAlert }> = ({ setAlert }) => {
   const [email, setEmail] = useState('');
   const classes = useStyles();
-  const [passwordReset] = useMutation<ResetPasswordResponse>(RESET_PASSWORD_MUTATION);
+  const [resetPassword] = useMutation<ResetPasswordResponse>(RESET_PASSWORD_MUTATION);
 
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     setEmail(event.target.value);
@@ -38,7 +38,7 @@ const ResetPassword: FC<{ setAlert: SetAlert }> = ({ setAlert }) => {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
-      const response = await passwordReset({
+      const response = await resetPassword({
         variables: { email }
       });
       if (response.errors) {

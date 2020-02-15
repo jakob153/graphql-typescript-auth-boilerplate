@@ -50,7 +50,7 @@ interface PrivateRouteProps extends RouteProps {
   condition: boolean;
 }
 
-const App: FC = props => {
+const App: FC = () => {
   const [user, setUser] = useState({ loggedIn: false, email: '' });
   const params = qs.parse(window.location.search, { ignoreQueryPrefix: true });
 
@@ -69,7 +69,10 @@ const App: FC = props => {
       if (!response.data.getCurrentUser.user) {
         return;
       }
-      setUser({ email: response.data.getCurrentUser.user.email, loggedIn: true });
+      setUser({
+        email: response.data.getCurrentUser.user.email,
+        loggedIn: true
+      });
     } catch (error) {
       // eslint-disable-next-line no-console
       console.log('No Auth Token Found');
@@ -77,13 +80,8 @@ const App: FC = props => {
   };
 
   useEffect(() => {
-    try {
-      getCurrentUser();
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error);
-    }
-  }, [props]);
+    getCurrentUser();
+  }, []);
 
   return (
     <ApolloProvider client={client}>

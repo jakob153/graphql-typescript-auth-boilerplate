@@ -7,7 +7,7 @@ import { makeStyles, Theme } from '@material-ui/core/styles';
 import AuthModal from './AuthModal';
 import { UserContext } from './UserContext';
 
-import { LOGOUT_MUTATION } from './Logout.mutation';
+import { LOGOUT_MUTATION } from './LogOut.mutation';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -29,7 +29,7 @@ const NavBar: FC = () => {
     setUser
   } = useContext(UserContext);
   const [showModal, setShowModal] = useState<ModalState>({ open: false, selectedTab: null });
-  const [logoutMutation] = useMutation(LOGOUT_MUTATION);
+  const [logOutMutation] = useMutation(LOGOUT_MUTATION);
   const classes = useStyles();
   const handleClick = (selectedTab: number) => () => {
     setShowModal(prevState => ({ open: !prevState.open, selectedTab }));
@@ -39,7 +39,7 @@ const NavBar: FC = () => {
   };
   const handleLogout = () => {
     setUser({ email: '', loggedIn: false });
-    logoutMutation();
+    logOutMutation();
   };
   const { open, selectedTab } = showModal;
 
