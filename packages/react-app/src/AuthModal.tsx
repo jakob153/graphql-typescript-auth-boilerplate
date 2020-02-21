@@ -1,5 +1,14 @@
 import React, { FC, useState } from 'react';
-import { Dialog, DialogTitle, IconButton, Tab, Tabs, makeStyles, Theme } from '@material-ui/core';
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  Tab,
+  Tabs,
+  makeStyles,
+  Theme
+} from '@material-ui/core';
 import { Close } from '@material-ui/icons';
 import LogIn from './LogIn';
 import SignUp from './SignUp';
@@ -48,8 +57,10 @@ const AuthModal: FC<Props> = ({ open, handleClose, selectedTab }) => {
           onClose={handleCloseAlert}
         />
       )}
-      {tab === 0 && <LogIn setAlert={setAlert} handleClose={handleClose} />}
-      {tab === 1 && <SignUp setAlert={setAlert} />}
+      <DialogContent>
+        {tab === 0 && <LogIn setAlert={setAlert} handleClose={handleClose} />}
+        {tab === 1 && <SignUp setAlert={setAlert} />}
+      </DialogContent>
       <IconButton
         className={classes.closeButton}
         onClick={() => handleClose && handleClose({}, 'backdropClick')}

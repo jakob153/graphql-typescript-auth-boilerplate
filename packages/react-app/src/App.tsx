@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState, ComponentType } from 'react';
+import React, { FC, useState, ComponentType } from 'react';
 import {
   BrowserRouter,
   Redirect,
@@ -10,7 +10,7 @@ import {
 import qs from 'qs';
 import ApolloClient from 'apollo-boost';
 import { ApolloProvider } from '@apollo/react-hooks';
-import { Container, CssBaseline, MuiThemeProvider, createMuiTheme } from '@material-ui/core';
+import { CssBaseline, MuiThemeProvider, createMuiTheme } from '@material-ui/core';
 import { blue } from '@material-ui/core/colors';
 
 import Dashboard from './Dashboard';
@@ -19,8 +19,6 @@ import ResetPassword from './ResetPassword';
 import ResetPasswordConfirm from './ResetPasswordConfirm';
 
 import { UserContext } from './UserContext';
-
-import { GET_CURRENT_USER_QUERY } from './GetCurrentUser.query';
 
 const theme = createMuiTheme({
   palette: {
@@ -34,15 +32,6 @@ export const client = new ApolloClient({
   uri: process.env.REACT_APP_GRAPHQL_API,
   credentials: 'include'
 });
-
-interface GetCurrentUserResponse {
-  getCurrentUser: {
-    user: {
-      email: string;
-    };
-    loggedIn: boolean;
-  };
-}
 
 interface PrivateRouteProps extends RouteProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -60,28 +49,6 @@ const App: FC = () => {
       render={props => (condition ? <Component {...props} /> : <Redirect to="/" />)}
     />
   );
-
-  const getCurrentUser = async () => {
-    try {
-      const response = await client.query<GetCurrentUserResponse>({
-        query: GET_CURRENT_USER_QUERY
-      });
-      if (!response.data.getCurrentUser.user) {
-        return;
-      }
-      setUser({
-        email: response.data.getCurrentUser.user.email,
-        loggedIn: true
-      });
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log(error);
-    }
-  };
-
-  useEffect(() => {
-    getCurrentUser();
-  }, []);
 
   return (
     <ApolloProvider client={client}>

@@ -17,7 +17,7 @@ import { confirmAccount } from './confirmAccount';
   app.get('/confirmAccount', confirmAccount);
 
   // get options from ormconfig.js
-  const dbOptions = await getConnectionOptions(process.env.NODE_ENV || 'development');
+  const dbOptions = await getConnectionOptions(process.env.NODE_ENV);
 
   await createConnection({ ...dbOptions, name: 'default' });
 

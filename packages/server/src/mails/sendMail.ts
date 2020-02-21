@@ -27,10 +27,7 @@ export const sendMail = async (mail: Mail, contextData: ContextData) => {
     }
   });
 
-  const templateAsString = fs.readFileSync(
-    `${__dirname}/../emails/${templateFilename}.handlebars`,
-    'utf-8'
-  );
+  const templateAsString = fs.readFileSync(`${__dirname}/${templateFilename}.handlebars`, 'utf-8');
   const hbs = handlebars.compile(templateAsString);
   const compiledMail = hbs({ ...contextData, email });
 

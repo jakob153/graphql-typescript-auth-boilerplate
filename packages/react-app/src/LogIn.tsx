@@ -1,7 +1,7 @@
 import React, { FC, useState, useContext } from 'react';
 import { useMutation } from '@apollo/react-hooks';
 import { useHistory } from 'react-router-dom';
-import { Box, Button, DialogContent, Link, TextField } from '@material-ui/core';
+import { Box, Button, Link, TextField } from '@material-ui/core';
 import { useStyles } from './Form.styles';
 
 import { UserContext } from './UserContext';
@@ -68,40 +68,38 @@ const LogIn: FC<Props> = ({ setAlert, handleClose }) => {
   };
 
   return (
-    <DialogContent>
-      <form className={classes.marginTop2} action="POST" onSubmit={handleSubmit}>
-        <TextField
-          autoComplete="email"
-          className={classes.marginBottom2}
-          label="Email"
-          type="email"
-          name="email"
-          onChange={handleChange}
-          value={form.email}
-          variant="filled"
-          fullWidth
-        />
-        <TextField
-          autoComplete="current-password"
-          className={classes.marginBottom1}
-          label="Password"
-          type="password"
-          name="password"
-          onChange={handleChange}
-          value={form.password}
-          variant="filled"
-          fullWidth
-        />
-        <Box marginBottom={4}>
-          <Link onClick={handleResetPasswort} href="">
-            Forgot Password?
-          </Link>
-        </Box>
-        <Button type="submit" disabled={!(form.email && form.password)} fullWidth>
-          Log In
-        </Button>
-      </form>
-    </DialogContent>
+    <form className={classes.marginTop2} action="POST" onSubmit={handleSubmit}>
+      <TextField
+        autoComplete="email"
+        className={classes.marginBottom2}
+        label="Email"
+        type="email"
+        name="email"
+        onChange={handleChange}
+        value={form.email}
+        variant="filled"
+        fullWidth
+      />
+      <TextField
+        autoComplete="current-password"
+        className={classes.marginBottom1}
+        label="Password"
+        type="password"
+        name="password"
+        onChange={handleChange}
+        value={form.password}
+        variant="filled"
+        fullWidth
+      />
+      <Box marginBottom={4}>
+        <Link onClick={handleResetPasswort} href="">
+          Forgot Password?
+        </Link>
+      </Box>
+      <Button type="submit" disabled={!(form.email && form.password)} fullWidth>
+        Log In
+      </Button>
+    </form>
   );
 };
 

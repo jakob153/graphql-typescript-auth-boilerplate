@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react';
-import { Button, DialogContent, TextField } from '@material-ui/core';
+import { Button, TextField } from '@material-ui/core';
 import { useMutation } from '@apollo/react-hooks';
 
 import { SetAlert } from './interfaces/Alert';
@@ -65,46 +65,44 @@ const SignUp: FC<Props> = ({ setAlert }) => {
   };
 
   return (
-    <DialogContent>
-      <form className={classes.marginTop2} onSubmit={handleSubmit}>
-        <TextField
-          name="email"
-          label="Email"
-          type="email"
-          className={classes.marginBottom2}
-          onChange={handleChange}
-          value={form.email}
-          variant="filled"
-          fullWidth
-          required
-        />
-        <TextField
-          name="password"
-          label="Password"
-          type="password"
-          className={classes.marginBottom2}
-          onChange={handleChange}
-          value={form.password}
-          variant="filled"
-          fullWidth
-          required
-        />
-        <TextField
-          name="password2"
-          label="Confirm Password"
-          type="password"
-          className={classes.marginBottom4}
-          onChange={handleChange}
-          value={form.password2}
-          variant="filled"
-          fullWidth
-          required
-        />
-        <Button type="submit" disabled={!(form.email && form.password && form.password2)} fullWidth>
-          Sign Up
-        </Button>
-      </form>
-    </DialogContent>
+    <form className={classes.marginTop2} onSubmit={handleSubmit}>
+      <TextField
+        name="email"
+        label="Email"
+        type="email"
+        className={classes.marginBottom2}
+        onChange={handleChange}
+        value={form.email}
+        variant="filled"
+        fullWidth
+        required
+      />
+      <TextField
+        name="password"
+        label="Password"
+        type="password"
+        className={classes.marginBottom2}
+        onChange={handleChange}
+        value={form.password}
+        variant="filled"
+        fullWidth
+        required
+      />
+      <TextField
+        name="password2"
+        label="Confirm Password"
+        type="password"
+        className={classes.marginBottom4}
+        onChange={handleChange}
+        value={form.password2}
+        variant="filled"
+        fullWidth
+        required
+      />
+      <Button type="submit" disabled={!(form.email && form.password && form.password2)} fullWidth>
+        Sign Up
+      </Button>
+    </form>
   );
 };
 

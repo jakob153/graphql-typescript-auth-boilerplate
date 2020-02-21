@@ -1,25 +1,23 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import { Arg, Ctx, Mutation, Resolver, Query, UseMiddleware } from 'type-graphql';
+import { Arg, Ctx, Mutation, Resolver } from 'type-graphql';
+import { ApolloError, UserInputError, AuthenticationError } from 'apollo-server-express';
+import { v4 as uuid } from 'uuid';
 
-import { sendMail } from '../utils/sendMail';
+import { sendMail } from '../mails/sendMail';
 import { User } from '../entity/User';
 
 import { Context } from '../types/Context';
 import { AuthInput } from '../types/AuthInput';
 import { UserResponse } from '../types/UserResponse';
 import { SuccessResponse } from '../types/SuccessResponse';
-import { ApolloError, UserInputError, AuthenticationError } from 'apollo-server-express';
-
-import { v4 as uuid } from 'uuid';
-import { verifyToken } from '../middlewares/verifyToken';
 
 const secret = process.env.SECRET as string;
 
 @Resolver()
 export class AuthResolver {
   @Mutation(() => SuccessResponse)
-  async register(
+  async signUp(
     @Arg('input')
     { email, password }: AuthInput
   ) {
@@ -63,7 +61,7 @@ export class AuthResolver {
   }
 
   @Mutation(() => UserResponse)
-  async login(@Arg('input') { email, password }: AuthInput, @Ctx() ctx: Context) {
+  async logIn(@Arg('input') { email, password }: AuthInput, @Ctx() ctx: Context) {
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -96,21 +94,10 @@ export class AuthResolver {
   }
 
   @Mutation(() => SuccessResponse)
-  async logout(@Ctx() ctx: Context) {
+  async logOut(@Ctx() ctx: Context) {
     ctx.res.clearCookie('auth_token');
 
     return { success: true };
-  }
-
-  @Query(() => UserResponse)
-  @UseMiddleware(verifyToken)
-  async getCurrentUser(@Ctx() ctx: Context) {
-    const user = await User.findOne(ctx.req.userId);
-
-    if (!user) {
-      throw new AuthenticationError('User not found');
-    }
-    return { user };
   }
 
   @Mutation(() => SuccessResponse)

@@ -2,14 +2,14 @@ import React, { FC, useContext, useState } from 'react';
 import { AppBar, Box, Button, Link, Toolbar, Typography } from '@material-ui/core';
 import { Link as RouterLink } from 'react-router-dom';
 import { useMutation } from '@apollo/react-hooks';
-import { makeStyles, Theme } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 
 import AuthModal from './AuthModal';
 import { UserContext } from './UserContext';
 
 import { LOGOUT_MUTATION } from './LogOut.mutation';
 
-const useStyles = makeStyles((theme: Theme) => ({
+const useStyles = makeStyles(() => ({
   root: {
     flexGrow: 1
   },
@@ -55,11 +55,9 @@ const NavBar: FC = () => {
   );
 
   const renderLogoutButton = () => (
-    <>
-      <Button color="inherit" onClick={handleLogout}>
-        Log Out
-      </Button>
-    </>
+    <Button color="inherit" onClick={handleLogout}>
+      Log Out
+    </Button>
   );
 
   return (
