@@ -1,22 +1,22 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import jwt, { VerifyErrors } from 'jsonwebtoken';
 
 import { User } from './entity/User';
 
 interface DecodedEmailToken {
-  sub?: string;
+  emailToken?: string;
 }
 
-export const confirmAccount = async (req: Request, res: Response, next: NextFunction) => {
+export const confirmAccount = async (req: Request, res: Response) => {
   const { emailToken: encodedEmailToken } = req.query;
   const secret = process.env.SECRET as string;
 
   jwt.verify(encodedEmailToken, secret, async (error: VerifyErrors, decoded: DecodedEmailToken) => {
-    if (error || !decoded.sub) {
+    if (error || !decoded.emailToken) {
       return res.status(400).send('Something went wrong');
     }
-    const { sub: emailToken } = decoded;
-    const user = await User.findOne(emailToken);
+    const { emailToken } = decoded;
+    const user = await User.findOne({ emailToken });
 
     if (!user) {
       return res.redirect(`${process.env.REACT_APP}?confirmAccount=false`);
@@ -27,6 +27,4 @@ export const confirmAccount = async (req: Request, res: Response, next: NextFunc
 
     return res.redirect(`${process.env.REACT_APP}?confirmAccount=true`);
   });
-
-  return next();
 };

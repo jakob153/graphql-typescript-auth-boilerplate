@@ -8,13 +8,13 @@ export class User extends BaseEntity {
   id: number;
 
   @Field()
-  @Column('text', { unique: true })
+  @Column({ unique: true })
   email: string;
 
-  @Column('text')
+  @Column({ unique: true })
   emailToken: string;
 
-  @Column('text')
+  @Column({ unique: true })
   refreshToken: string;
 
   @Column()

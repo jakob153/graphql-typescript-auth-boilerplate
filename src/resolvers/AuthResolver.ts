@@ -31,14 +31,16 @@ export class AuthResolver {
 
     const hashedPassword = await bcrypt.hash(password, 12);
     const emailToken = uuid();
+    const refreshToken = uuid();
 
     const user = await User.create({
       email,
       password: hashedPassword,
-      emailToken
+      emailToken,
+      refreshToken
     }).save();
 
-    const emailTokenEncoded = jwt.sign({ emailToken }, secret, {
+    const emailTokenSigned = jwt.sign({ emailToken }, secret, {
       expiresIn: '15m'
     });
 
@@ -49,7 +51,7 @@ export class AuthResolver {
     };
 
     const contextData = {
-      host: `${process.env.SERVER}/confirmAccount?emailToken=${emailTokenEncoded}`
+      host: `${process.env.SERVER}/confirmAccount?emailToken=${emailTokenSigned}`
     };
 
     try {
@@ -78,6 +80,8 @@ export class AuthResolver {
       throw new UserInputError('Invalid Email/Password');
     }
 
+    const { refreshToken } = user;
+
     // const authToken = jwt.sign({ sub: user.id }, secret, {
     //   expiresIn: '1d'
     // });
@@ -85,12 +89,19 @@ export class AuthResolver {
       expiresIn: 10
     });
 
-    const date = new Date();
+    const authTokenDate = new Date();
+    const refreshTokenDate = new Date();
 
     ctx.res.cookie('auth_token', authToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      expires: new Date(date.setMonth(date.getMonth() + 6))
+      expires: new Date(authTokenDate.setMonth(authTokenDate.getMonth() + 5))
+    });
+
+    ctx.res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      expires: new Date(refreshTokenDate.setMonth(refreshTokenDate.getMonth() + 6))
     });
 
     return { user };

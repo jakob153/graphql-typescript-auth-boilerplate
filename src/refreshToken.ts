@@ -33,7 +33,13 @@ export const refreshToken = async (req: Request, res: Response, next: NextFuncti
       expiresIn: 10
     });
 
-    req.cookies['auth_token'] = authToken;
+    const authTokenDate = new Date();
+
+    res.cookie('auth_token', authToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      expires: new Date(authTokenDate.setMonth(authTokenDate.getMonth() + 5))
+    });
   });
 
   return next();
