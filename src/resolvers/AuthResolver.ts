@@ -82,26 +82,30 @@ export class AuthResolver {
 
     const { refreshToken } = user;
 
-    // const authToken = jwt.sign({ sub: user.id }, secret, {
+    // const authToken = jwt.sign({ authToken: user.id }, secret, {
     //   expiresIn: '1d'
     // });
-    const authToken = jwt.sign({ sub: user.id }, secret, {
+    const authTokenSigned = jwt.sign({ authToken: user.id }, secret, {
       expiresIn: 10
     });
+    const refreshTokenSigned = jwt.sign({ refreshToken }, secret, { expiresIn: '60 days' });
 
     const authTokenDate = new Date();
     const refreshTokenDate = new Date();
 
-    ctx.res.cookie('auth_token', authToken, {
+    ctx.res.cookie('auth_token', authTokenSigned, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      expires: new Date(authTokenDate.setMonth(authTokenDate.getMonth() + 5))
+      expires: new Date(authTokenDate.setMonth(authTokenDate.getMonth() + 5)),
+      sameSite: process.env.NODE_ENV === 'production' && 'none'
     });
 
-    ctx.res.cookie('refresh_token', refreshToken, {
+    ctx.res.cookie('refresh_token', refreshTokenSigned, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      expires: new Date(refreshTokenDate.setMonth(refreshTokenDate.getMonth() + 6))
+      expires: new Date(refreshTokenDate.setMonth(refreshTokenDate.getMonth() + 6)),
+      path: '/refreshToken',
+      sameSite: process.env.NODE_ENV === 'production' && 'none'
     });
 
     return { user };
@@ -127,7 +131,7 @@ export class AuthResolver {
     user.emailToken = newEmailToken;
     user.save();
 
-    const emailToken = jwt.sign({ sub: newEmailToken }, secret, {
+    const emailToken = jwt.sign({ emailToken: newEmailToken }, secret, {
       expiresIn: '15m'
     });
 

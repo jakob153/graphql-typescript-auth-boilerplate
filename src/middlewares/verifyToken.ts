@@ -1,5 +1,5 @@
 import { MiddlewareFn } from 'type-graphql';
-import jwt, { VerifyErrors } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { Context } from '../types/Context';
 import { AuthenticationError } from 'apollo-server-express';
 
@@ -11,13 +11,13 @@ export const verifyToken: MiddlewareFn<Context> = async ({ context }, next) => {
   }
   const authToken = context.req.cookies['auth_token'];
 
-  jwt.verify(authToken, secret, (error: VerifyErrors) => {
+  try {
+    jwt.verify(authToken, secret);
+    return next();
+  } catch (error) {
     if (error.name === 'TokenExpiredError') {
       throw new AuthenticationError('TokenExpiredError');
     }
-    if (error) {
-      throw new AuthenticationError('Authentication Error');
-    }
-    return next();
-  });
+    throw new AuthenticationError('Authentication Error');
+  }
 };

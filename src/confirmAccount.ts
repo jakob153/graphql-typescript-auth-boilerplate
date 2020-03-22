@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import jwt, { VerifyErrors } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 
 import { User } from './entity/User';
 
@@ -11,11 +11,13 @@ export const confirmAccount = async (req: Request, res: Response) => {
   const { emailToken: encodedEmailToken } = req.query;
   const secret = process.env.SECRET as string;
 
-  jwt.verify(encodedEmailToken, secret, async (error: VerifyErrors, decoded: DecodedEmailToken) => {
-    if (error || !decoded.emailToken) {
+  try {
+    const { emailToken } = jwt.verify(encodedEmailToken, secret) as DecodedEmailToken;
+
+    if (!emailToken) {
       return res.status(400).send('Something went wrong');
     }
-    const { emailToken } = decoded;
+
     const user = await User.findOne({ emailToken });
 
     if (!user) {
@@ -26,5 +28,7 @@ export const confirmAccount = async (req: Request, res: Response) => {
     user.save();
 
     return res.redirect(`${process.env.REACT_APP}?confirmAccount=true`);
-  });
+  } catch (error) {
+    return res.status(400).send('Something went wrong');
+  }
 };
