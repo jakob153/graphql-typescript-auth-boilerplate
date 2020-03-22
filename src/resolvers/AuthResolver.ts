@@ -78,8 +78,11 @@ export class AuthResolver {
       throw new UserInputError('Invalid Email/Password');
     }
 
+    // const authToken = jwt.sign({ sub: user.id }, secret, {
+    //   expiresIn: '1d'
+    // });
     const authToken = jwt.sign({ sub: user.id }, secret, {
-      expiresIn: '1d'
+      expiresIn: 10
     });
 
     const date = new Date();
@@ -87,7 +90,7 @@ export class AuthResolver {
     ctx.res.cookie('auth_token', authToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      expires: new Date(date.setMonth(date.getMonth() + 1))
+      expires: new Date(date.setMonth(date.getMonth() + 6))
     });
 
     return { user };

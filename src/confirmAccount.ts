@@ -1,19 +1,32 @@
-import { Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
+import { Request, Response, NextFunction } from 'express';
+import jwt, { VerifyErrors } from 'jsonwebtoken';
 
 import { User } from './entity/User';
-import { DecodedToken } from './types/DecodedToken';
 
-export const confirmAccount = async (req: Request, res: Response) => {
+interface DecodedEmailToken {
+  sub?: string;
+}
+
+export const confirmAccount = async (req: Request, res: Response, next: NextFunction) => {
   const { emailToken: encodedEmailToken } = req.query;
   const secret = process.env.SECRET as string;
-  const { sub: emailToken } = jwt.verify(encodedEmailToken, secret) as DecodedToken;
-  const user = await User.findOne(emailToken);
 
-  if (!user) {
-    return res.redirect(`${process.env.REACT_APP}?confirmAccount=false`);
-  }
-  user.verified = true;
-  user.save();
-  return res.redirect(`${process.env.REACT_APP}?confirmAccount=true`);
+  jwt.verify(encodedEmailToken, secret, async (error: VerifyErrors, decoded: DecodedEmailToken) => {
+    if (error || !decoded.sub) {
+      return res.status(400).send('Something went wrong');
+    }
+    const { sub: emailToken } = decoded;
+    const user = await User.findOne(emailToken);
+
+    if (!user) {
+      return res.redirect(`${process.env.REACT_APP}?confirmAccount=false`);
+    }
+
+    user.verified = true;
+    user.save();
+
+    return res.redirect(`${process.env.REACT_APP}?confirmAccount=true`);
+  });
+
+  return next();
 };

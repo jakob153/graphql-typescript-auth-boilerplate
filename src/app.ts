@@ -3,6 +3,7 @@ require('dotenv').config({
 });
 
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import { createConnection, getConnectionOptions } from 'typeorm';
 import { ApolloServer } from 'apollo-server-express';
 import { buildSchema } from 'type-graphql';
@@ -11,10 +12,13 @@ import { AuthResolver } from './resolvers/AuthResolver';
 import { BookResolver } from './resolvers/BookResolver';
 
 import { confirmAccount } from './confirmAccount';
+import { refreshToken } from './refreshToken';
 
 (async () => {
   const app = express();
+  app.use(cookieParser());
   app.get('/confirmAccount', confirmAccount);
+  app.get('/refreshToken', refreshToken);
 
   try {
     // get options from ormconfig.js
@@ -25,7 +29,8 @@ import { confirmAccount } from './confirmAccount';
     const schema = await buildSchema({ resolvers: [AuthResolver, BookResolver], validate: false });
     const apolloServer = new ApolloServer({
       schema,
-      context: ({ req, res }) => ({ req, res })
+      context: ({ req, res }) => ({ req, res }),
+      debug: false
     });
 
     apolloServer.applyMiddleware({
