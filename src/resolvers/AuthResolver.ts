@@ -12,6 +12,10 @@ import { AuthInput } from '../types/AuthInput';
 import { UserResponse } from '../types/UserResponse';
 import { SuccessResponse } from '../types/SuccessResponse';
 
+interface DecodedEmailToken {
+  emailToken: string;
+}
+
 const secret = process.env.SECRET as string;
 
 @Resolver()
@@ -120,62 +124,54 @@ export class AuthResolver {
 
   @Mutation(() => SuccessResponse)
   async resetPassword(@Arg('email') email: string) {
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      throw new UserInputError('User not found');
-    }
-
-    const newEmailToken = uuid();
-
-    user.emailToken = newEmailToken;
-    user.save();
-
-    const emailToken = jwt.sign({ emailToken: newEmailToken }, secret, {
-      expiresIn: '15m'
-    });
-
-    const mail = {
-      email: user.email,
-      subject: 'Reset Password',
-      templateFilename: 'resetPassword'
-    };
-
-    const contextData = {
-      host: `${process.env.REACT_APP}/resetPasswordConfirm?emailToken=${emailToken}`
-    };
-
     try {
+      const user = await User.findOne({ email });
+
+      if (!user) {
+        throw new UserInputError('User not found');
+      }
+
+      const emailToken = jwt.sign({ emailToken: user.emailToken }, secret, {
+        expiresIn: '15m'
+      });
+
+      const mail = {
+        email: user.email,
+        subject: 'Reset Password',
+        templateFilename: 'resetPassword'
+      };
+
+      const contextData = {
+        host: `${process.env.SERVER}/generateEmailToken?emailToken=${emailToken}`
+      };
+
       await sendMail(mail, contextData);
       return { success: true };
     } catch (error) {
-      throw new ApolloError(`Something went wrong while sending the mail. Error: ${error.message}`);
+      throw new ApolloError('Something went wrong');
     }
   }
 
   @Mutation(() => SuccessResponse)
   async resetPasswordConfirm(
-    @Arg('oldPassword') oldPassword: string,
     @Arg('newPassword') newPassword: string,
     @Arg('emailToken') emailToken: string
   ) {
-    const emailTokenDecoded = jwt.sign(emailToken, secret);
-    const user = await User.findOne({ where: { emailToken: emailTokenDecoded } });
+    try {
+      const { emailToken: emailTokenDecoded } = jwt.verify(emailToken, secret) as DecodedEmailToken;
+      const user = await User.findOne({ where: { emailToken: emailTokenDecoded } });
 
-    if (!user) {
-      throw new AuthenticationError('User not found');
+      if (!user) {
+        throw new AuthenticationError('User not found');
+      }
+
+      const hashedPassword = await bcrypt.hash(newPassword, 12);
+      user.password = hashedPassword;
+      user.save();
+
+      return { success: true };
+    } catch (error) {
+      throw new AuthenticationError('Someting went wrong');
     }
-    const valid = await bcrypt.compare(oldPassword, user.password);
-
-    if (!valid) {
-      throw new AuthenticationError('Old Password invalid');
-    }
-
-    const hashedPassword = await bcrypt.hash(newPassword, 12);
-
-    user.password = hashedPassword;
-    user.save();
-
-    return { success: true };
   }
 }

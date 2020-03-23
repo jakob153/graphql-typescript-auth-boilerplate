@@ -13,12 +13,14 @@ import { BookResolver } from './resolvers/BookResolver';
 
 import { confirmAccount } from './confirmAccount';
 import { refreshToken } from './refreshToken';
+import { generateEmailToken } from './generateEmailToken';
 
 (async () => {
   const app = express();
   app.use(cookieParser());
   app.get('/confirmAccount', confirmAccount);
   app.get('/refreshToken', refreshToken);
+  app.get('/generateEmailToken', generateEmailToken);
 
   try {
     // get options from ormconfig.js

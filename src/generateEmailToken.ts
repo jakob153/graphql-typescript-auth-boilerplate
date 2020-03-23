@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
+import { v4 as uuid } from 'uuid';
 
 import { User } from './entity/User';
 
@@ -7,7 +8,7 @@ interface DecodedEmailToken {
   emailToken?: string;
 }
 
-export const confirmAccount = async (req: Request, res: Response) => {
+export const generateEmailToken = async (req: Request, res: Response) => {
   const { emailToken: encodedEmailToken } = req.query;
   const secret = process.env.SECRET as string;
 
@@ -25,13 +26,19 @@ export const confirmAccount = async (req: Request, res: Response) => {
     const user = await User.findOne({ emailToken });
 
     if (!user) {
-      return res.redirect(`${process.env.REACT_APP}/login?confirmAccount=false`);
+      return res.status(400).send('Something went wrong');
     }
 
-    user.verified = true;
+    const newEmailToken = uuid();
+
+    user.emailToken = newEmailToken;
     user.save();
 
-    return res.redirect(`${process.env.REACT_APP}/login?confirmAccount=true`);
+    const newEmailTokenSigned = jwt.sign({ emailToken: newEmailToken }, secret);
+
+    return res.redirect(
+      `${process.env.REACT_APP}/resetPasswordConfirm?emailToken=${newEmailTokenSigned}`
+    );
   } catch (error) {
     return res.status(400).send('Something went wrong');
   }
