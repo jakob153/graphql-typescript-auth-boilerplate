@@ -10,6 +10,6 @@ module.exports = {
   rules: {
     "@typescript-eslint/explicit-function-return-type": OFF,
     "no-console": ERROR,
-    "prettier/prettier": [ERROR, { singleQuote: true, printWidth: 100 }]
+    "prettier/prettier": [ERROR, { singleQuote: true, printWidth: 100, trailingComma: "none" }]
   }
 };

@@ -23,7 +23,6 @@ import { generateEmailToken } from './generateEmailToken';
   app.get('/generateEmailToken', generateEmailToken);
 
   try {
-    // get options from ormconfig.js
     const dbOptions = await getConnectionOptions(process.env.NODE_ENV);
     await createConnection({ ...dbOptions, name: 'default' });
 
