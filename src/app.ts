@@ -1,5 +1,5 @@
 require('dotenv').config({
-  path: `./.env.${process.env.NODE_ENV}`
+  path: `./.env.${process.env.NODE_ENV}`,
 });
 
 import express from 'express';
@@ -31,12 +31,12 @@ import { generateEmailToken } from './generateEmailToken';
     const apolloServer = new ApolloServer({
       schema,
       context: ({ req, res }) => ({ req, res }),
-      debug: false
+      debug: false,
     });
 
     apolloServer.applyMiddleware({
       app,
-      cors: { credentials: true, origin: process.env.REACT_APP }
+      cors: { credentials: true, origin: process.env.REACT_APP },
     });
 
     app.listen(port, () => {

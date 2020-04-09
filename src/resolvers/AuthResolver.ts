@@ -29,7 +29,7 @@ export class AuthResolver {
 
     if (existingUser) {
       throw new UserInputError('Invalid Email/Password', {
-        email: 'email already taken'
+        email: 'email already taken',
       });
     }
 
@@ -41,21 +41,21 @@ export class AuthResolver {
       email,
       password: hashedPassword,
       emailToken,
-      refreshToken
+      refreshToken,
     }).save();
 
     const emailTokenSigned = jwt.sign({ emailToken }, secret, {
-      expiresIn: '15m'
+      expiresIn: '15m',
     });
 
     const mail = {
       email: user.email,
       subject: 'Welcome to Blacklist',
-      templateFilename: 'confirmAccount'
+      templateFilename: 'confirmAccount',
     };
 
     const contextData = {
-      host: `${process.env.SERVER}/confirmAccount?emailToken=${emailTokenSigned}`
+      host: `${process.env.SERVER}/confirmAccount?emailToken=${emailTokenSigned}`,
     };
 
     try {
@@ -90,7 +90,7 @@ export class AuthResolver {
     //   expiresIn: '1d'
     // });
     const authTokenSigned = jwt.sign({ authToken: user.id }, secret, {
-      expiresIn: 10
+      expiresIn: 10,
     });
     const refreshTokenSigned = jwt.sign({ refreshToken }, secret, { expiresIn: '60 days' });
 
@@ -101,7 +101,7 @@ export class AuthResolver {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       expires: new Date(authTokenDate.setMonth(authTokenDate.getMonth() + 5)),
-      sameSite: process.env.NODE_ENV === 'production' && 'none'
+      sameSite: process.env.NODE_ENV === 'production' && 'none',
     });
 
     ctx.res.cookie('refresh_token', refreshTokenSigned, {
@@ -109,7 +109,7 @@ export class AuthResolver {
       secure: process.env.NODE_ENV === 'production',
       expires: new Date(refreshTokenDate.setMonth(refreshTokenDate.getMonth() + 6)),
       path: '/refreshToken',
-      sameSite: process.env.NODE_ENV === 'production' && 'none'
+      sameSite: process.env.NODE_ENV === 'production' && 'none',
     });
 
     return { user };
@@ -132,17 +132,17 @@ export class AuthResolver {
       }
 
       const emailToken = jwt.sign({ emailToken: user.emailToken }, secret, {
-        expiresIn: '15m'
+        expiresIn: '15m',
       });
 
       const mail = {
         email: user.email,
         subject: 'Reset Password',
-        templateFilename: 'resetPassword'
+        templateFilename: 'resetPassword',
       };
 
       const contextData = {
-        host: `${process.env.SERVER}/generateEmailToken?emailToken=${emailToken}`
+        host: `${process.env.SERVER}/generateEmailToken?emailToken=${emailToken}`,
       };
 
       await sendMail(mail, contextData);

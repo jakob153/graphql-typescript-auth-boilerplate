@@ -31,7 +31,7 @@ export const refreshToken = async (req: Request, res: Response) => {
     }
 
     const authToken = jwt.sign({ authToken: user.id }, secret, {
-      expiresIn: '1d'
+      expiresIn: '1d',
     });
     const authTokenDate = new Date();
     // res.cookie('auth_token', authToken, {
@@ -43,7 +43,7 @@ export const refreshToken = async (req: Request, res: Response) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       expires: new Date(authTokenDate.setSeconds(authTokenDate.getSeconds() + 10)),
-      sameSite: process.env.NODE_ENV === 'production' && 'none'
+      sameSite: process.env.NODE_ENV === 'production' && 'none',
     });
 
     return res.status(200).send('Auth Token Updated');

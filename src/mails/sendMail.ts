@@ -23,8 +23,8 @@ export const sendMail = async (mail: Mail, contextData: ContextData) => {
     secure: account.smtp.secure,
     auth: {
       user: account.user,
-      pass: account.pass
-    }
+      pass: account.pass,
+    },
   });
 
   const templateAsString = fs.readFileSync(`${__dirname}/${templateFilename}.handlebars`, 'utf-8');
@@ -35,7 +35,7 @@ export const sendMail = async (mail: Mail, contextData: ContextData) => {
     from: process.env.MAIL,
     to: email,
     subject: subject,
-    html: compiledMail
+    html: compiledMail,
   };
 
   // send mail with defined transport object
