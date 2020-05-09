@@ -34,6 +34,7 @@ export class AuthResolver {
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
+
     const emailToken = uuid();
     const refreshToken = uuid();
 

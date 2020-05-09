@@ -17,13 +17,16 @@ import { generateEmailToken } from './generateEmailToken';
 
 (async () => {
   const app = express();
+
   app.use(cookieParser());
+
   app.get('/confirmAccount', confirmAccount);
   app.get('/refreshToken', refreshToken);
   app.get('/generateEmailToken', generateEmailToken);
 
   try {
     const dbOptions = await getConnectionOptions(process.env.NODE_ENV);
+
     await createConnection({ ...dbOptions, name: 'default' });
 
     const port = process.env.PORT || 4000;
@@ -44,7 +47,6 @@ import { generateEmailToken } from './generateEmailToken';
       console.log(`server started at http://localhost:${port}/graphql`);
     });
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error(error);
   }
 })();

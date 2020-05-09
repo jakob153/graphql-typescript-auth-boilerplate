@@ -40,6 +40,7 @@ export const sendMail = async (mail: Mail, contextData: ContextData) => {
 
   // send mail with defined transport object
   const info = await transporter.sendMail(mailOptions);
+
   // eslint-disable-next-line no-console
   console.log(info);
   // eslint-disable-next-line no-console

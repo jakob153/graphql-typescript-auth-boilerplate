@@ -1,11 +1,8 @@
-const OFF = 0;
-const ERROR = 2;
-
 module.exports = {
   extends: ['plugin:@typescript-eslint/recommended', 'plugin:prettier/recommended'],
   parser: '@typescript-eslint/parser',
   rules: {
-    '@typescript-eslint/explicit-function-return-type': OFF,
-    'no-console': ERROR,
+    '@typescript-eslint/explicit-function-return-type': 'off',
+    'no-console': ['error', { allow: ['error'] }],
   },
 };
