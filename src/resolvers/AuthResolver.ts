@@ -7,14 +7,10 @@ import { v4 as uuid } from 'uuid';
 import { sendMail } from '../mails/sendMail';
 import { User } from '../entity/User';
 
-import { Context } from '../types/Context';
+import { Context, DecodedEmailToken } from '../types/types';
 import { AuthInput } from '../types/AuthInput';
 import { UserResponse } from '../types/UserResponse';
 import { SuccessResponse } from '../types/SuccessResponse';
-
-interface DecodedEmailToken {
-  emailToken: string;
-}
 
 const secret = process.env.SECRET as string;
 

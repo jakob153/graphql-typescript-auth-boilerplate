@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development nodemon --exec ts-node --files src/app.ts",
     "build": "tsc",
-    "lint": "eslint --fix src/**/*.{ts,tsx}"
+    "lint": "eslint src/**/*.{ts,tsx}",
+    "lint:fix": "eslint --fix src/**/*.{ts,tsx}"
   },
   "dependencies": {
     "apollo-server-express": "^2.13.0",
