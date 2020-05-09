@@ -9,6 +9,7 @@ export const verifyToken: MiddlewareFn<Context> = async ({ context }, next) => {
   if (!(context.req.cookies && context.req.cookies['auth_token'])) {
     throw new AuthenticationError('Not Authenticated');
   }
+
   const authToken = context.req.cookies['auth_token'];
 
   try {

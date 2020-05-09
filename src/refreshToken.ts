@@ -11,25 +11,23 @@ const secret = process.env.SECRET as string;
 
 export const refreshToken = async (req: Request, res: Response) => {
   if (!(req.cookies['auth_token'] && req.cookies['refresh_token'])) {
-    return res.status(404).send('No Auth/Refresh Token Provided');
+    res.status(404).send('No Auth/Refresh Token Provided');
   }
 
   const refreshToken = req.cookies['refresh_token'];
 
   try {
-    const { refreshToken: decodedRefreshToken } = jwt.verify(
-      refreshToken,
-      secret
-    ) as DecodedRefreshToken;
+    const jwtDecoded = jwt.verify(refreshToken, secret) as DecodedRefreshToken;
 
-    if (!decodedRefreshToken) {
-      return res.status(401).send('Token Invalid/Expired');
+    if (!jwtDecoded.refreshToken) {
+      res.status(401).send('Token Invalid/Expired');
     }
 
-    const user = await User.findOne({ where: { refreshToken: decodedRefreshToken } });
+    const user = await User.findOne({ where: { refreshToken: jwtDecoded.refreshToken } });
 
     if (!user) {
-      return res.status(401).send('Token Invalid/Expired');
+      res.status(401).send('Token Invalid/Expired');
+      return;
     }
 
     const authToken = jwt.sign({ authToken: user.id }, secret, {
@@ -50,8 +48,8 @@ export const refreshToken = async (req: Request, res: Response) => {
       sameSite: process.env.NODE_ENV === 'production' && 'none',
     });
 
-    return res.status(200).send('Auth Token Updated');
+    res.status(200).send('Auth Token Updated');
   } catch (error) {
-    return res.status(401).send('Token Invalid/Expired');
+    res.status(401).send('Token Invalid/Expired');
   }
 };

@@ -13,8 +13,6 @@ interface ContextData {
 }
 
 export const sendMail = async (mail: Mail, contextData: ContextData) => {
-  const { email, subject, templateFilename } = mail;
-
   const account = await nodemailer.createTestAccount();
 
   const transporter = nodemailer.createTransport({
@@ -27,14 +25,17 @@ export const sendMail = async (mail: Mail, contextData: ContextData) => {
     },
   });
 
-  const templateAsString = fs.readFileSync(`${__dirname}/${templateFilename}.handlebars`, 'utf-8');
+  const templateAsString = fs.readFileSync(
+    `${__dirname}/${mail.templateFilename}.handlebars`,
+    'utf-8'
+  );
   const hbs = handlebars.compile(templateAsString);
-  const compiledMail = hbs({ ...contextData, email });
+  const compiledMail = hbs({ ...contextData, email: mail.email });
 
   const mailOptions = {
     from: process.env.MAIL,
-    to: email,
-    subject: subject,
+    to: mail.email,
+    subject: mail.subject,
     html: compiledMail,
   };
 

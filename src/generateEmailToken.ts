@@ -9,24 +9,24 @@ interface DecodedEmailToken {
 }
 
 export const generateEmailToken = async (req: Request, res: Response) => {
-  const { emailToken: encodedEmailToken } = req.query;
   const secret = process.env.SECRET as string;
 
-  if (!encodedEmailToken) {
-    return res.status(404).send('No Email Token Provided');
+  if (!req.query.emailToken) {
+    res.status(404).send('No Email Token Provided');
   }
 
   try {
-    const { emailToken } = jwt.verify(encodedEmailToken, secret) as DecodedEmailToken;
+    const jwtDecoded = jwt.verify(req.query.emailToken, secret) as DecodedEmailToken;
 
-    if (!emailToken) {
-      return res.status(400).send('Something went wrong');
+    if (!jwtDecoded.emailToken) {
+      res.status(400).send('Something went wrong');
     }
 
-    const user = await User.findOne({ emailToken });
+    const user = await User.findOne({ emailToken: jwtDecoded.emailToken });
 
     if (!user) {
-      return res.status(400).send('Something went wrong');
+      res.status(400).send('Something went wrong');
+      return;
     }
 
     const newEmailToken = uuid();
@@ -36,10 +36,8 @@ export const generateEmailToken = async (req: Request, res: Response) => {
 
     const newEmailTokenSigned = jwt.sign({ emailToken: newEmailToken }, secret);
 
-    return res.redirect(
-      `${process.env.REACT_APP}/resetPasswordConfirm?emailToken=${newEmailTokenSigned}`
-    );
+    res.redirect(`${process.env.REACT_APP}/resetPasswordConfirm?emailToken=${newEmailTokenSigned}`);
   } catch (error) {
-    return res.status(400).send('Something went wrong');
+    res.status(400).send('Something went wrong');
   }
 };

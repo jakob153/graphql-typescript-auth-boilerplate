@@ -30,7 +30,9 @@ import { generateEmailToken } from './generateEmailToken';
     await createConnection({ ...dbOptions, name: 'default' });
 
     const port = process.env.PORT || 4000;
+
     const schema = await buildSchema({ resolvers: [AuthResolver, BookResolver], validate: false });
+
     const apolloServer = new ApolloServer({
       schema,
       context: ({ req, res }) => ({ req, res }),

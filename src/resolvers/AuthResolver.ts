@@ -85,15 +85,15 @@ export class AuthResolver {
       throw new UserInputError('Invalid Email/Password');
     }
 
-    const { refreshToken } = user;
-
     // const authToken = jwt.sign({ authToken: user.id }, secret, {
     //   expiresIn: '1d'
     // });
     const authTokenSigned = jwt.sign({ authToken: user.id }, secret, {
       expiresIn: 10,
     });
-    const refreshTokenSigned = jwt.sign({ refreshToken }, secret, { expiresIn: '60 days' });
+    const refreshTokenSigned = jwt.sign({ refreshToken: user.refreshToken }, secret, {
+      expiresIn: '60 days',
+    });
 
     const authTokenDate = new Date();
     const refreshTokenDate = new Date();
@@ -147,6 +147,7 @@ export class AuthResolver {
       };
 
       await sendMail(mail, contextData);
+
       return { success: true };
     } catch (error) {
       throw new ApolloError('Something went wrong');
@@ -159,14 +160,16 @@ export class AuthResolver {
     @Arg('emailToken') emailToken: string
   ) {
     try {
-      const { emailToken: emailTokenDecoded } = jwt.verify(emailToken, secret) as DecodedEmailToken;
-      const user = await User.findOne({ where: { emailToken: emailTokenDecoded } });
+      const jwtDecoded = jwt.verify(emailToken, secret) as DecodedEmailToken;
+
+      const user = await User.findOne({ where: { emailToken: jwtDecoded.emailToken } });
 
       if (!user) {
         throw new AuthenticationError('User not found');
       }
 
       const hashedPassword = await bcrypt.hash(newPassword, 12);
+
       user.password = hashedPassword;
       user.save();
 
