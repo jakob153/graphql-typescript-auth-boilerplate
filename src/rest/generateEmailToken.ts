@@ -2,8 +2,8 @@ import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { v4 as uuid } from 'uuid';
 
-import { User } from './entity/User';
-import { DecodedEmailToken } from './types/types';
+import { User } from '../entity/User';
+import { DecodedEmailToken } from '../types/types';
 
 export const generateEmailToken = async (req: Request, res: Response) => {
   const secret = process.env.SECRET as string;

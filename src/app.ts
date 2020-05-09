@@ -11,9 +11,9 @@ import { buildSchema } from 'type-graphql';
 import { AuthResolver } from './resolvers/AuthResolver';
 import { BookResolver } from './resolvers/BookResolver';
 
-import { confirmAccount } from './confirmAccount';
-import { refreshToken } from './refreshToken';
-import { generateEmailToken } from './generateEmailToken';
+import { confirmAccount } from './rest/confirmAccount';
+import { refreshToken } from './rest/refreshToken';
+import { generateEmailToken } from './rest/generateEmailToken';
 
 (async () => {
   const app = express();
