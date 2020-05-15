@@ -2,10 +2,7 @@
   "compilerOptions": {
     "target": "es6",
     "module": "commonjs",
-    "lib": [
-      "es6",
-      "es7",
-    ],
+    "lib": ["es6", "es7"],
     "sourceMap": false,
     "outDir": "./dist",
     "moduleResolution": "node",
@@ -22,6 +19,6 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "resolveJsonModule": true,
-    "baseUrl": "."
+    "skipLibCheck": true
   }
 }

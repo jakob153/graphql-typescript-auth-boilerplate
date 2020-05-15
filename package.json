@@ -5,7 +5,7 @@
   "main": "src/app.ts",
   "scripts": {
     "dev": "cross-env NODE_ENV=development nodemon --exec ts-node --files src/app.ts",
-    "build": "tsc",
+    "build": "cross-env NODE_ENV=production tsc",
     "format": "prettier --write src/**/*.{ts,tsx}"
   },
   "dependencies": {
@@ -36,6 +36,6 @@
     "nodemon": "^2.0.3",
     "prettier": "^2.0.5",
     "ts-node": "^8.10.1",
-    "typescript": "^3.8.3"
+    "typescript": "^3.9.2"
   }
 }
