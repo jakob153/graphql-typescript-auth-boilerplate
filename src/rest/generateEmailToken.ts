@@ -13,7 +13,10 @@ export const generateEmailToken = async (req: Request, res: Response) => {
   }
 
   try {
-    const jwtDecoded = jwt.verify(req.query.emailToken, secret) as DecodedEmailToken;
+    const jwtDecoded = jwt.verify(
+      req.query.emailToken,
+      secret
+    ) as DecodedEmailToken;
 
     if (!jwtDecoded.emailToken) {
       res.status(400).send('Something went wrong');
@@ -33,7 +36,9 @@ export const generateEmailToken = async (req: Request, res: Response) => {
 
     const newEmailTokenSigned = jwt.sign({ emailToken: newEmailToken }, secret);
 
-    res.redirect(`${process.env.REACT_APP}/resetPasswordConfirm?emailToken=${newEmailTokenSigned}`);
+    res.redirect(
+      `${process.env.REACT_APP}/resetPasswordConfirm?emailToken=${newEmailTokenSigned}`
+    );
   } catch (error) {
     res.status(400).send('Something went wrong');
   }

@@ -12,7 +12,10 @@ export const confirmAccount = async (req: Request, res: Response) => {
   }
 
   try {
-    const jwtDecoded = jwt.verify(req.query.emailToken, secret) as DecodedEmailToken;
+    const jwtDecoded = jwt.verify(
+      req.query.emailToken,
+      secret
+    ) as DecodedEmailToken;
 
     if (!jwtDecoded.emailToken) {
       res.status(400).send('Something went wrong');

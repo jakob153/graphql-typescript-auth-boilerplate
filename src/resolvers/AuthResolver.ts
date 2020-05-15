@@ -1,7 +1,11 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { Arg, Ctx, Mutation, Resolver } from 'type-graphql';
-import { ApolloError, UserInputError, AuthenticationError } from 'apollo-server-express';
+import {
+  ApolloError,
+  UserInputError,
+  AuthenticationError,
+} from 'apollo-server-express';
 import { v4 as uuid } from 'uuid';
 
 import { sendMail } from '../mails/sendMail';
@@ -59,12 +63,17 @@ export class AuthResolver {
       await sendMail(mail, contextData);
       return { success: true };
     } catch (error) {
-      throw new ApolloError(`Someting went wrong while sending an email. Error: ${error.message}`);
+      throw new ApolloError(
+        `Someting went wrong while sending an email. Error: ${error.message}`
+      );
     }
   }
 
   @Mutation(() => UserResponse)
-  async logIn(@Arg('input') { email, password }: AuthInput, @Ctx() ctx: Context) {
+  async logIn(
+    @Arg('input') { email, password }: AuthInput,
+    @Ctx() ctx: Context
+  ) {
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -87,9 +96,13 @@ export class AuthResolver {
     const authTokenSigned = jwt.sign({ authToken: user.id }, secret, {
       expiresIn: 10,
     });
-    const refreshTokenSigned = jwt.sign({ refreshToken: user.refreshToken }, secret, {
-      expiresIn: '60 days',
-    });
+    const refreshTokenSigned = jwt.sign(
+      { refreshToken: user.refreshToken },
+      secret,
+      {
+        expiresIn: '60 days',
+      }
+    );
 
     const authTokenDate = new Date();
     const refreshTokenDate = new Date();
@@ -104,7 +117,9 @@ export class AuthResolver {
     ctx.res.cookie('refresh_token', refreshTokenSigned, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      expires: new Date(refreshTokenDate.setMonth(refreshTokenDate.getMonth() + 6)),
+      expires: new Date(
+        refreshTokenDate.setMonth(refreshTokenDate.getMonth() + 6)
+      ),
       path: '/refreshToken',
       sameSite: process.env.NODE_ENV === 'production' && 'none',
     });
@@ -158,7 +173,9 @@ export class AuthResolver {
     try {
       const jwtDecoded = jwt.verify(emailToken, secret) as DecodedEmailToken;
 
-      const user = await User.findOne({ where: { emailToken: jwtDecoded.emailToken } });
+      const user = await User.findOne({
+        where: { emailToken: jwtDecoded.emailToken },
+      });
 
       if (!user) {
         throw new AuthenticationError('User not found');

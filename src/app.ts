@@ -31,7 +31,10 @@ import { generateEmailToken } from './rest/generateEmailToken';
 
     const port = process.env.PORT || 4000;
 
-    const schema = await buildSchema({ resolvers: [AuthResolver, BookResolver], validate: false });
+    const schema = await buildSchema({
+      resolvers: [AuthResolver, BookResolver],
+      validate: false,
+    });
 
     const apolloServer = new ApolloServer({
       schema,
