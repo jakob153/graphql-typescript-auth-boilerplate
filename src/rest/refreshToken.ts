@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 
 import { User } from '../entity/User';
-import { DecodedRefreshToken } from '../types/types';
+import { DecodedRefreshToken } from '../types';
 
 const secret = process.env.SECRET as string;
 

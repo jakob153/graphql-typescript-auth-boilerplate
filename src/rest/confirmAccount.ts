@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 
 import { User } from '../entity/User';
-import { DecodedEmailToken } from '../types/types';
+import { DecodedEmailToken } from '../types';
 
 export const confirmAccount = async (req: Request, res: Response) => {
   const secret = process.env.SECRET as string;
