@@ -26,47 +26,51 @@ export class AuthResolver {
     @Arg('input')
     { email, password }: AuthInput
   ) {
-    const existingUser = await User.findOne({ email });
-
-    if (existingUser) {
-      throw new UserInputError('Invalid Email/Password', {
-        email: 'email already taken',
-      });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 12);
-
-    const emailToken = uuid();
-    const refreshToken = uuid();
-
-    const user = await User.create({
-      email,
-      password: hashedPassword,
-      emailToken,
-      refreshToken,
-    }).save();
-
-    const emailTokenSigned = jwt.sign({ emailToken }, secret, {
-      expiresIn: '15m',
-    });
-
-    const mail = {
-      email: user.email,
-      subject: 'Welcome to Blacklist',
-      templateFilename: 'confirmAccount',
-    };
-
-    const contextData = {
-      host: `${process.env.SERVER}/confirmAccount?emailToken=${emailTokenSigned}`,
-    };
-
     try {
-      await sendMail(mail, contextData);
-      return { success: true };
+      const existingUser = await User.findOne({ email });
+
+      if (existingUser) {
+        throw new UserInputError('Invalid Email/Password', {
+          email: 'email already taken',
+        });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 12);
+
+      const emailToken = uuid();
+      const refreshToken = uuid();
+
+      const user = await User.create({
+        email,
+        password: hashedPassword,
+        emailToken,
+        refreshToken,
+      }).save();
+
+      const emailTokenSigned = jwt.sign({ emailToken }, secret, {
+        expiresIn: '15m',
+      });
+
+      const mail = {
+        email: user.email,
+        subject: 'Welcome to Blacklist',
+        templateFilename: 'confirmAccount',
+      };
+
+      const contextData = {
+        host: `${process.env.SERVER}/confirmAccount?emailToken=${emailTokenSigned}`,
+      };
+
+      try {
+        await sendMail(mail, contextData);
+        return { success: true };
+      } catch (error) {
+        throw new ApolloError(
+          `Someting went wrong while sending an email. Error: ${error.message}`
+        );
+      }
     } catch (error) {
-      throw new ApolloError(
-        `Someting went wrong while sending an email. Error: ${error.message}`
-      );
+      throw new AuthenticationError('Someting went wrong');
     }
   }
 
@@ -75,57 +79,60 @@ export class AuthResolver {
     @Arg('input') { email, password }: AuthInput,
     @Ctx() ctx: Context
   ) {
-    const user = await User.findOne({ email });
+    try {
+      const user = await User.findOne({ email });
 
-    if (!user) {
-      throw new UserInputError('Invalid Email/Password');
-    }
-
-    if (!user.verified) {
-      throw new AuthenticationError('User not verified');
-    }
-
-    const valid = await bcrypt.compare(password, user.password);
-
-    if (!valid) {
-      throw new UserInputError('Invalid Email/Password');
-    }
-
-    // const authToken = jwt.sign({ authToken: user.id }, secret, {
-    //   expiresIn: '1d'
-    // });
-    const authTokenSigned = jwt.sign({ authToken: user.id }, secret, {
-      expiresIn: 10,
-    });
-    const refreshTokenSigned = jwt.sign(
-      { refreshToken: user.refreshToken },
-      secret,
-      {
-        expiresIn: '60 days',
+      if (!user) {
+        throw new UserInputError('Invalid Email/Password');
       }
-    );
 
-    const authTokenDate = new Date();
-    const refreshTokenDate = new Date();
+      if (!user.verified) {
+        throw new AuthenticationError('User not verified');
+      }
 
-    ctx.res.cookie('auth_token', authTokenSigned, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      expires: new Date(authTokenDate.setMonth(authTokenDate.getMonth() + 5)),
-      sameSite: process.env.NODE_ENV === 'production' && 'none',
-    });
+      const valid = await bcrypt.compare(password, user.password);
 
-    ctx.res.cookie('refresh_token', refreshTokenSigned, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      expires: new Date(
-        refreshTokenDate.setMonth(refreshTokenDate.getMonth() + 6)
-      ),
-      path: '/refreshToken',
-      sameSite: process.env.NODE_ENV === 'production' && 'none',
-    });
+      if (!valid) {
+        throw new UserInputError('Invalid Email/Password');
+      }
 
-    return { user };
+      const authTokenSigned = jwt.sign({ authToken: user.id }, secret, {
+        expiresIn: '1d',
+      });
+      const refreshTokenSigned = jwt.sign(
+        { refreshToken: user.refreshToken },
+        secret,
+        {
+          expiresIn: '60 days',
+        }
+      );
+
+      const authTokenDate = new Date();
+      const refreshTokenDate = new Date();
+
+      ctx.res.cookie('auth_token', authTokenSigned, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        expires: new Date(
+          authTokenDate.setHours(authTokenDate.getHours() + 23)
+        ),
+        sameSite: process.env.NODE_ENV === 'production' && 'none',
+      });
+
+      ctx.res.cookie('refresh_token', refreshTokenSigned, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        expires: new Date(
+          refreshTokenDate.setHours(refreshTokenDate.getHours() + 1416)
+        ),
+        path: '/refreshToken',
+        sameSite: process.env.NODE_ENV === 'production' && 'none',
+      });
+
+      return { user };
+    } catch (error) {
+      throw new ApolloError('Someting went wrong!');
+    }
   }
 
   @Mutation(() => SuccessResponse)

@@ -32,20 +32,13 @@ export const refreshToken = async (req: Request, res: Response) => {
     const authToken = jwt.sign({ authToken: user.id }, secret, {
       expiresIn: '1d',
     });
-    const authTokenDate = new Date();
 
-    // res.cookie('auth_token', authToken, {
-    //   httpOnly: true,
-    //   secure: process.env.NODE_ENV === 'production',
-    //   expires: new Date(authTokenDate.setMonth(authTokenDate.getMonth() + 5))
-    // });
+    const authTokenDate = new Date();
 
     res.cookie('auth_token', authToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      expires: new Date(
-        authTokenDate.setSeconds(authTokenDate.getSeconds() + 10)
-      ),
+      expires: new Date(authTokenDate.setHours(authTokenDate.getHours() + 23)),
       sameSite: process.env.NODE_ENV === 'production' && 'none',
     });
 
