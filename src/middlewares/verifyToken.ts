@@ -14,12 +14,8 @@ export const verifyToken: MiddlewareFn<Context> = async ({ context }, next) => {
 
   try {
     jwt.verify(authToken, secret);
-    next();
+    return next();
   } catch (error) {
-    if (error.name === 'TokenExpiredError') {
-      throw new AuthenticationError('TokenExpiredError');
-    }
-
     throw new AuthenticationError('Authentication Error');
   }
 };

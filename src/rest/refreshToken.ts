@@ -9,8 +9,8 @@ const secret = process.env.SECRET as string;
 export const refreshToken = async (req: Request, res: Response) => {
   if (!(req.cookies['auth_token'] && req.cookies['refresh_token'])) {
     res.status(404).send('No Auth/Refresh Token Provided');
+    return;
   }
-
   const refreshToken = req.cookies['refresh_token'];
 
   try {
@@ -18,6 +18,7 @@ export const refreshToken = async (req: Request, res: Response) => {
 
     if (!jwtDecoded.refreshToken) {
       res.status(401).send('Token Invalid/Expired');
+      return;
     }
 
     const user = await User.findOne({
@@ -29,8 +30,8 @@ export const refreshToken = async (req: Request, res: Response) => {
       return;
     }
 
-    const authToken = jwt.sign({ authToken: user.id }, secret, {
-      expiresIn: '1d',
+    const authToken = jwt.sign({ userId: user.id }, secret, {
+      expiresIn: '170h',
     });
 
     const authTokenDate = new Date();
@@ -38,7 +39,7 @@ export const refreshToken = async (req: Request, res: Response) => {
     res.cookie('auth_token', authToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      expires: new Date(authTokenDate.setHours(authTokenDate.getHours() + 23)),
+      expires: new Date(authTokenDate.setHours(authTokenDate.getHours() + 168)),
       sameSite: process.env.NODE_ENV === 'production' && 'none',
     });
 

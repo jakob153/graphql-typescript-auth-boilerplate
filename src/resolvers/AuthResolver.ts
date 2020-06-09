@@ -38,13 +38,11 @@ export class AuthResolver {
       const hashedPassword = await bcrypt.hash(password, 12);
 
       const emailToken = uuid();
-      const refreshToken = uuid();
 
       const user = await User.create({
         email,
         password: hashedPassword,
         emailToken,
-        refreshToken,
       }).save();
 
       const emailTokenSigned = jwt.sign({ emailToken }, secret, {
@@ -70,6 +68,7 @@ export class AuthResolver {
         );
       }
     } catch (error) {
+      console.error(error);
       throw new AuthenticationError('Someting went wrong');
     }
   }
@@ -96,14 +95,17 @@ export class AuthResolver {
         throw new UserInputError('Invalid Email/Password');
       }
 
-      const authTokenSigned = jwt.sign({ authToken: user.id }, secret, {
-        expiresIn: '1d',
+      user.refreshToken = uuid();
+      user.save();
+
+      const authTokenSigned = jwt.sign({ userId: user.id }, secret, {
+        expiresIn: '170h',
       });
       const refreshTokenSigned = jwt.sign(
         { refreshToken: user.refreshToken },
         secret,
         {
-          expiresIn: '60 days',
+          expiresIn: '722h',
         }
       );
 
@@ -114,7 +116,7 @@ export class AuthResolver {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         expires: new Date(
-          authTokenDate.setHours(authTokenDate.getHours() + 23)
+          authTokenDate.setHours(authTokenDate.getHours() + 168)
         ),
         sameSite: process.env.NODE_ENV === 'production' && 'none',
       });
@@ -123,7 +125,7 @@ export class AuthResolver {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         expires: new Date(
-          refreshTokenDate.setHours(refreshTokenDate.getHours() + 1416)
+          refreshTokenDate.setHours(refreshTokenDate.getHours() + 720)
         ),
         path: '/refreshToken',
         sameSite: process.env.NODE_ENV === 'production' && 'none',
@@ -131,6 +133,7 @@ export class AuthResolver {
 
       return { user };
     } catch (error) {
+      console.error(error);
       throw new ApolloError('Someting went wrong!');
     }
   }
@@ -169,6 +172,7 @@ export class AuthResolver {
 
       return { success: true };
     } catch (error) {
+      console.error(error);
       throw new ApolloError('Something went wrong');
     }
   }
@@ -196,6 +200,7 @@ export class AuthResolver {
 
       return { success: true };
     } catch (error) {
+      console.error(error);
       throw new AuthenticationError('Someting went wrong');
     }
   }
