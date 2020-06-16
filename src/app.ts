@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { createConnection, getConnectionOptions } from 'typeorm';
 import { ApolloServer } from 'apollo-server-express';
@@ -14,6 +15,7 @@ import { generateEmailToken } from './rest/generateEmailToken';
 (async () => {
   const app = express();
 
+  app.use(cors({ origin: process.env.REACT_APP }));
   app.use(cookieParser());
 
   app.get('/confirmAccount', confirmAccount);
@@ -40,7 +42,6 @@ import { generateEmailToken } from './rest/generateEmailToken';
 
     apolloServer.applyMiddleware({
       app,
-      cors: { credentials: true, origin: process.env.REACT_APP },
     });
 
     app.listen(port, () => {

@@ -68,8 +68,7 @@ export class AuthResolver {
         );
       }
     } catch (error) {
-      console.error(error);
-      throw new AuthenticationError('Someting went wrong');
+      throw error;
     }
   }
 
@@ -118,8 +117,7 @@ export class AuthResolver {
 
       return { user };
     } catch (error) {
-      console.error(error);
-      throw new ApolloError('Someting went wrong!');
+      throw error;
     }
   }
 
@@ -157,8 +155,7 @@ export class AuthResolver {
 
       return { success: true };
     } catch (error) {
-      console.error(error);
-      throw new ApolloError('Something went wrong');
+      throw error;
     }
   }
 
@@ -185,8 +182,7 @@ export class AuthResolver {
 
       return { success: true };
     } catch (error) {
-      console.error(error);
-      throw new AuthenticationError('Someting went wrong');
+      throw error;
     }
   }
 }

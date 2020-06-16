@@ -8,7 +8,7 @@ const secret = process.env.SECRET as string;
 
 export const refreshToken = async (req: Request, res: Response) => {
   if (!req.cookies['refresh_token']) {
-    res.status(404).send('No Refresh Token Provided');
+    res.status(401).send('No Refresh Token Provided');
     return;
   }
   const refreshToken = req.cookies['refresh_token'];
