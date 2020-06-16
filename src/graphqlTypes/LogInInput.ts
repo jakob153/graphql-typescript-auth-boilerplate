@@ -1,9 +1,9 @@
 import { InputType, Field } from 'type-graphql';
 
 @InputType()
-export class AuthInput {
+export class LogInInput {
   @Field()
-  email: string;
+  usernameOrEmail: string;
 
   @Field()
   password: string;

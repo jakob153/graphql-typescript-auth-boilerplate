@@ -9,7 +9,14 @@ export class User extends BaseEntity {
 
   @Field()
   @Column({ unique: true })
+  username: string;
+
+  @Field()
+  @Column({ unique: true })
   email: string;
+
+  @Field()
+  authToken: string;
 
   @Column({ unique: true })
   emailToken: string;

@@ -15,7 +15,7 @@ import { generateEmailToken } from './rest/generateEmailToken';
 (async () => {
   const app = express();
 
-  app.use(cors({ origin: process.env.REACT_APP }));
+  app.use(cors({ origin: process.env.REACT_APP, credentials: true }));
   app.use(cookieParser());
 
   app.get('/confirmAccount', confirmAccount);

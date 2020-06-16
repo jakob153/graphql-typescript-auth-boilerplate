@@ -7,6 +7,7 @@ import { DecodedRefreshToken } from '../types';
 const secret = process.env.SECRET as string;
 
 export const refreshToken = async (req: Request, res: Response) => {
+  console.log(req.cookies);
   if (!req.cookies['refresh_token']) {
     res.status(401).send('No Refresh Token Provided');
     return;
@@ -15,19 +16,18 @@ export const refreshToken = async (req: Request, res: Response) => {
 
   try {
     const jwtDecoded = jwt.verify(refreshToken, secret) as DecodedRefreshToken;
+    console.log(jwtDecoded);
 
     if (!jwtDecoded.refreshToken) {
-      res.status(401).send('Token Invalid/Expired');
-      return;
+      throw Error;
     }
 
     const user = await User.findOne({
-      where: { refreshToken: jwtDecoded.refreshToken },
+      refreshToken: jwtDecoded.refreshToken,
     });
 
     if (!user) {
-      res.status(401).send('Token Invalid/Expired');
-      return;
+      throw Error;
     }
 
     res.send(user);

@@ -11,7 +11,8 @@ import { v4 as uuid } from 'uuid';
 import { sendMail } from '../mails/sendMail';
 import { User } from '../entity/User';
 
-import { AuthInput } from '../graphqlTypes/AuthInput';
+import { LogInInput } from '../graphqlTypes/LogInInput';
+import { SignUpInput } from '../graphqlTypes/SignUpInput';
 import { UserResponse } from '../graphqlTypes/UserResponse';
 import { SuccessResponse } from '../graphqlTypes/SuccessResponse';
 
@@ -24,12 +25,14 @@ export class AuthResolver {
   @Mutation(() => SuccessResponse)
   async signUp(
     @Arg('input')
-    { email, password }: AuthInput
+    { username, email, password }: SignUpInput
   ) {
     try {
-      const existingUser = await User.findOne({ email });
+      const existingUser = await User.find({
+        where: [{ username }, { email }],
+      });
 
-      if (existingUser) {
+      if (existingUser.length) {
         throw new UserInputError('Invalid Email/Password', {
           email: 'email already taken',
         });
@@ -40,6 +43,7 @@ export class AuthResolver {
       const emailToken = uuid();
 
       const user = await User.create({
+        username,
         email,
         password: hashedPassword,
         emailToken,
@@ -74,11 +78,13 @@ export class AuthResolver {
 
   @Mutation(() => UserResponse)
   async logIn(
-    @Arg('input') { email, password }: AuthInput,
+    @Arg('input') { usernameOrEmail, password }: LogInInput,
     @Ctx() ctx: Context
   ) {
     try {
-      const user = await User.findOne({ email });
+      const [user] = await User.find({
+        where: [{ username: usernameOrEmail }, { email: usernameOrEmail }],
+      });
 
       if (!user) {
         throw new UserInputError('Invalid Email/Password');
@@ -94,25 +100,31 @@ export class AuthResolver {
         throw new UserInputError('Invalid Email/Password');
       }
 
-      user.refreshToken = uuid();
+      const refreshToken = uuid();
+      const authToken = uuid();
+
+      user.refreshToken = refreshToken;
       user.save();
 
-      const refreshTokenSigned = jwt.sign(
-        { refreshToken: user.refreshToken },
-        secret,
-        {
-          expiresIn: '722h',
-        }
-      );
+      const authTokenSigned = jwt.sign({ authToken }, secret, {
+        expiresIn: '1d',
+      });
+      const refreshTokenSigned = jwt.sign({ refreshToken }, secret, {
+        expiresIn: '722h',
+      });
+
+      user.authToken = authTokenSigned;
+
       const refreshTokenDate = new Date();
+
       ctx.res.cookie('refresh_token', refreshTokenSigned, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         expires: new Date(
           refreshTokenDate.setHours(refreshTokenDate.getHours() + 720)
         ),
-        path: '/refreshToken',
-        sameSite: process.env.NODE_ENV === 'production' && 'none',
+        // path: '/refreshToken',
+        sameSite: 'none',
       });
 
       return { user };
@@ -123,7 +135,7 @@ export class AuthResolver {
 
   @Mutation(() => SuccessResponse)
   async logOut(@Ctx() ctx: Context) {
-    ctx.res.clearCookie('auth_token');
+    ctx.res.clearCookie('refresh_token');
 
     return { success: true };
   }
