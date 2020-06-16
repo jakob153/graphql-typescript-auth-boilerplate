@@ -20,6 +20,7 @@ export const generateEmailToken = async (req: Request, res: Response) => {
 
     if (!jwtDecoded.emailToken) {
       res.status(400).send('Something went wrong');
+      return;
     }
 
     const user = await User.findOne({ emailToken: jwtDecoded.emailToken });

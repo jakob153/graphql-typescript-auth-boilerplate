@@ -98,9 +98,6 @@ export class AuthResolver {
       user.refreshToken = uuid();
       user.save();
 
-      const authTokenSigned = jwt.sign({ userId: user.id }, secret, {
-        expiresIn: '170h',
-      });
       const refreshTokenSigned = jwt.sign(
         { refreshToken: user.refreshToken },
         secret,
@@ -108,19 +105,7 @@ export class AuthResolver {
           expiresIn: '722h',
         }
       );
-
-      const authTokenDate = new Date();
       const refreshTokenDate = new Date();
-
-      ctx.res.cookie('auth_token', authTokenSigned, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        expires: new Date(
-          authTokenDate.setHours(authTokenDate.getHours() + 168)
-        ),
-        sameSite: process.env.NODE_ENV === 'production' && 'none',
-      });
-
       ctx.res.cookie('refresh_token', refreshTokenSigned, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',

@@ -9,6 +9,7 @@ export const confirmAccount = async (req: Request, res: Response) => {
 
   if (!req.query.emailToken) {
     res.status(404).send('No Email Token Provided');
+    return;
   }
 
   try {
@@ -19,6 +20,7 @@ export const confirmAccount = async (req: Request, res: Response) => {
 
     if (!jwtDecoded.emailToken) {
       res.status(400).send('Something went wrong');
+      return;
     }
 
     const user = await User.findOne({ emailToken: jwtDecoded.emailToken });

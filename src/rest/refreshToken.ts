@@ -7,8 +7,8 @@ import { DecodedRefreshToken } from '../types';
 const secret = process.env.SECRET as string;
 
 export const refreshToken = async (req: Request, res: Response) => {
-  if (!(req.cookies['auth_token'] && req.cookies['refresh_token'])) {
-    res.status(404).send('No Auth/Refresh Token Provided');
+  if (!req.cookies['refresh_token']) {
+    res.status(404).send('No Refresh Token Provided');
     return;
   }
   const refreshToken = req.cookies['refresh_token'];
@@ -30,20 +30,7 @@ export const refreshToken = async (req: Request, res: Response) => {
       return;
     }
 
-    const authToken = jwt.sign({ userId: user.id }, secret, {
-      expiresIn: '170h',
-    });
-
-    const authTokenDate = new Date();
-
-    res.cookie('auth_token', authToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      expires: new Date(authTokenDate.setHours(authTokenDate.getHours() + 168)),
-      sameSite: process.env.NODE_ENV === 'production' && 'none',
-    });
-
-    res.status(200).send('Auth Token Updated');
+    res.send(user);
   } catch (error) {
     res.status(401).send('Token Invalid/Expired');
   }
