@@ -4,7 +4,7 @@
   "private": true,
   "main": "src/app.ts",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development nodemon --exec ts-node --files src/app.ts",
+    "dev": "cross-env NODE_ENV=development nodemon --exec ts-node -r ./loadEnv src/app.ts",
     "build": "cross-env NODE_ENV=production tsc",
     "format": "prettier --write src/**/*.{ts,tsx}"
   },

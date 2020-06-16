@@ -1,7 +1,3 @@
-require('dotenv').config({
-  path: `./.env.${process.env.NODE_ENV}`,
-});
-
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import { createConnection, getConnectionOptions } from 'typeorm';
