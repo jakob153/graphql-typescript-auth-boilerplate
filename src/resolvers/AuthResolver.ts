@@ -16,7 +16,7 @@ import { SignUpInput } from '../graphqlTypes/SignUpInput';
 import { UserResponse } from '../graphqlTypes/UserResponse';
 import { SuccessResponse } from '../graphqlTypes/SuccessResponse';
 
-import { Context, DecodedEmailToken } from '../types';
+import { Context } from '../types';
 
 const secret = process.env.SECRET as string;
 
@@ -164,33 +164,6 @@ export class AuthResolver {
       };
 
       await sendMail(mail, contextData);
-
-      return { success: true };
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  @Mutation(() => SuccessResponse)
-  async resetPasswordConfirm(
-    @Arg('newPassword') newPassword: string,
-    @Arg('emailToken') emailToken: string
-  ) {
-    try {
-      const jwtDecoded = jwt.verify(emailToken, secret) as DecodedEmailToken;
-
-      const user = await User.findOne({
-        where: { emailToken: jwtDecoded.emailToken },
-      });
-
-      if (!user) {
-        throw new AuthenticationError('User not found');
-      }
-
-      const hashedPassword = await bcrypt.hash(newPassword, 12);
-
-      user.password = hashedPassword;
-      user.save();
 
       return { success: true };
     } catch (error) {
