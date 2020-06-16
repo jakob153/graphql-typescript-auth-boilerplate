@@ -42,6 +42,7 @@ import { generateEmailToken } from './rest/generateEmailToken';
 
     apolloServer.applyMiddleware({
       app,
+      cors: { origin: process.env.REACT_APP, credentials: true },
     });
 
     app.listen(port, () => {

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
+import { v4 as uuid } from 'uuid';
 
 import { User } from '../entity/User';
 import { DecodedRefreshToken } from '../types';
@@ -7,7 +8,6 @@ import { DecodedRefreshToken } from '../types';
 const secret = process.env.SECRET as string;
 
 export const refreshToken = async (req: Request, res: Response) => {
-  console.log(req.cookies);
   if (!req.cookies['refresh_token']) {
     res.status(401).send('No Refresh Token Provided');
     return;
@@ -16,7 +16,6 @@ export const refreshToken = async (req: Request, res: Response) => {
 
   try {
     const jwtDecoded = jwt.verify(refreshToken, secret) as DecodedRefreshToken;
-    console.log(jwtDecoded);
 
     if (!jwtDecoded.refreshToken) {
       throw Error;
@@ -30,7 +29,18 @@ export const refreshToken = async (req: Request, res: Response) => {
       throw Error;
     }
 
-    res.send(user);
+    const newAuthToken = uuid();
+    const authTokenSigned = jwt.sign({ authToken: newAuthToken }, secret, {
+      expiresIn: '1d',
+    });
+
+    const lightUser = {
+      username: user.username,
+      email: user.email,
+      authToken: authTokenSigned,
+    };
+
+    res.send(lightUser);
   } catch (error) {
     res.status(401).send('Token Invalid/Expired');
   }

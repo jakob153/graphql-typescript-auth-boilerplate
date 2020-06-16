@@ -123,8 +123,8 @@ export class AuthResolver {
         expires: new Date(
           refreshTokenDate.setHours(refreshTokenDate.getHours() + 720)
         ),
-        // path: '/refreshToken',
-        sameSite: 'none',
+        path: '/refreshToken',
+        sameSite: process.env.NODE_ENV === 'production' && 'none',
       });
 
       return { user };
@@ -135,7 +135,7 @@ export class AuthResolver {
 
   @Mutation(() => SuccessResponse)
   async logOut(@Ctx() ctx: Context) {
-    ctx.res.clearCookie('refresh_token');
+    ctx.res.clearCookie('refresh_token', { path: '/refreshToken' });
 
     return { success: true };
   }
