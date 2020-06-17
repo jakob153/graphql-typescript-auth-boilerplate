@@ -60,7 +60,7 @@ export class AuthResolver {
       };
 
       const contextData = {
-        host: `${process.env.SERVER}/confirmAccount?emailToken=${emailTokenSigned}`,
+        host: `${process.env.REST_API}/rest/confirmAccount?emailToken=${emailTokenSigned}`,
       };
 
       try {
@@ -162,7 +162,7 @@ export class AuthResolver {
       };
 
       const contextData = {
-        host: `${process.env.SERVER}/generateEmailToken?emailToken=${emailToken}`,
+        host: `${process.env.REST_API}/rest/resetPassword/${emailToken}/${user.id}`,
       };
 
       await sendMail(mail, contextData);

@@ -5,7 +5,10 @@ import { AuthenticationError } from 'apollo-server-express';
 
 const secret = process.env.SECRET as string;
 
-export const verifyToken: MiddlewareFn<Context> = async ({ context }, next) => {
+export const verifyAuthToken: MiddlewareFn<Context> = async (
+  { context },
+  next
+) => {
   try {
     if (!context.req.headers['authorization']) {
       throw new AuthenticationError('Not Authenticated');

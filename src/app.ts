@@ -10,17 +10,31 @@ import { BookResolver } from './resolvers/BookResolver';
 
 import { confirmAccount } from './rest/confirmAccount';
 import { refreshToken } from './rest/refreshToken';
-import { generateEmailToken } from './rest/generateEmailToken';
+import { resetPassword } from './rest/resetPassword';
+import { resetPasswordConfirm } from './rest/resetPasswordConfirm';
+
+import { verifyEmailToken } from './middlewares/verifyEmailToken';
 
 (async () => {
   const app = express();
+  const router = express.Router();
+
+  router.get('/confirmAccount', confirmAccount);
+  router.get('/refreshToken', refreshToken);
+  router.get(
+    '/resetPassword/:emailToken/:userId',
+    verifyEmailToken,
+    resetPassword
+  );
+  router.post(
+    '/resetPassword/:emailToken/:userId/confirm',
+    verifyEmailToken,
+    resetPasswordConfirm
+  );
 
   app.use(cors({ origin: process.env.REACT_APP, credentials: true }));
   app.use(cookieParser());
-
-  app.get('/confirmAccount', confirmAccount);
-  app.get('/refreshToken', refreshToken);
-  app.get('/generateEmailToken', generateEmailToken);
+  app.use('/rest', router);
 
   try {
     const dbOptions = await getConnectionOptions(process.env.NODE_ENV);
