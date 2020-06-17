@@ -116,13 +116,12 @@ export class AuthResolver {
       user.authToken = authTokenSigned;
 
       const refreshTokenDate = new Date();
+      refreshTokenDate.setHours(refreshTokenDate.getHours() + 720);
 
       ctx.res.cookie('refresh_token', refreshTokenSigned, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        expires: new Date(
-          refreshTokenDate.setHours(refreshTokenDate.getHours() + 720)
-        ),
+        expires: refreshTokenDate,
         path: '/refreshToken',
         sameSite: process.env.NODE_ENV === 'production' && 'none',
       });
@@ -141,9 +140,12 @@ export class AuthResolver {
   }
 
   @Mutation(() => SuccessResponse)
-  async resetPassword(@Arg('email') email: string) {
+  async resetPassword(
+    @Arg('username') username: string,
+    @Arg('email') email: string
+  ) {
     try {
-      const user = await User.findOne({ email });
+      const user = await User.findOne({ email, username });
 
       if (!user) {
         throw new UserInputError('User not found');
