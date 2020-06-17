@@ -100,8 +100,8 @@ export class AuthResolver {
         throw new UserInputError('Invalid Email/Password');
       }
 
-      const refreshToken = uuid();
       const authToken = uuid();
+      const refreshToken = uuid();
 
       user.refreshToken = refreshToken;
       user.save();
