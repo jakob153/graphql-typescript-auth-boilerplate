@@ -5,6 +5,10 @@ export interface Context {
   res: Response;
 }
 
+export interface DecodedAuthToken {
+  authToken?: string;
+}
+
 export interface DecodedRefreshToken {
   refreshToken?: string;
 }

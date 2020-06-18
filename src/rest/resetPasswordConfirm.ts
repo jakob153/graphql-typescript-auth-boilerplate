@@ -4,10 +4,9 @@ import { v4 as uuid } from 'uuid';
 import { User } from '../entity/User';
 
 export const resetPasswordConfirm = async (req: Request, res: Response) => {
-  const emailToken = req.param('emailToken');
-  const userId = req.param('userId');
-
   try {
+    const emailToken = res.locals.emailToken;
+    const userId = req.params['userId'];
     const user = await User.findOne({ emailToken, id: parseInt(userId) });
 
     if (!user) {
@@ -20,8 +19,8 @@ export const resetPasswordConfirm = async (req: Request, res: Response) => {
     user.emailToken = newEmailToken;
     user.save();
 
-    res.redirect(`${process.env.REACT_APP}?confirmPasswordChange`);
+    res.json({ REACT_APP: process.env.REACT_APP });
   } catch (error) {
-    res.status(400).send('Something went wrong');
+    res.sendStatus(502);
   }
 };

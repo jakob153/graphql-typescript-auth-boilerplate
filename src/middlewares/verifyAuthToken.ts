@@ -1,6 +1,6 @@
 import { MiddlewareFn } from 'type-graphql';
 import jwt from 'jsonwebtoken';
-import { Context } from '../types';
+import { Context, DecodedAuthToken } from '../types';
 import { AuthenticationError } from 'apollo-server-express';
 
 const secret = process.env.SECRET as string;
@@ -15,7 +15,8 @@ export const verifyAuthToken: MiddlewareFn<Context> = async (
     }
 
     const authToken = context.req.headers['authorization'].split('Bearer ')[1];
-    jwt.verify(authToken, secret);
+    const decodedToken = jwt.verify(authToken, secret) as DecodedAuthToken;
+    context.res.locals.authToken = decodedToken.authToken;
 
     return next();
   } catch (error) {
