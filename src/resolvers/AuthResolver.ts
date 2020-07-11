@@ -50,7 +50,7 @@ export class AuthResolver {
 
       const mail = {
         email: user.email,
-        subject: 'Welcome to Blacklist',
+        subject: 'Welcome to Corperation',
         templateFilename: 'confirmAccount',
       };
 
@@ -118,7 +118,7 @@ export class AuthResolver {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         expires: refreshTokenDate,
-        path: '/refreshToken',
+        path: '/rest/refreshToken',
         sameSite: process.env.NODE_ENV === 'production' && 'none',
       });
 
