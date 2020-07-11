@@ -5,7 +5,7 @@ import { User } from '../entity/User';
 
 export const resetPassword = async (req: Request, res: Response) => {
   try {
-    const emailToken = res.locals.emailToken;
+    const emailToken = req.params['emailToken'];
     const userId = req.params['userId'];
     const user = await User.findOne({ emailToken, id: parseInt(userId) });
 

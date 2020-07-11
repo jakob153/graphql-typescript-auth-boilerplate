@@ -13,22 +13,15 @@ import { refreshToken } from './rest/refreshToken';
 import { resetPassword } from './rest/resetPassword';
 import { resetPasswordConfirm } from './rest/resetPasswordConfirm';
 
-import { verifyEmailToken } from './middlewares/verifyEmailToken';
-
 (async () => {
   const app = express();
   const router = express.Router();
 
   router.get('/confirmAccount', confirmAccount);
   router.get('/refreshToken', refreshToken);
-  router.get(
-    '/resetPassword/:emailToken/:userId',
-    verifyEmailToken,
-    resetPassword
-  );
+  router.get('/resetPassword/:emailToken/:userId', resetPassword);
   router.post(
     '/resetPassword/:emailToken/:userId/confirm',
-    verifyEmailToken,
     resetPasswordConfirm
   );
 
