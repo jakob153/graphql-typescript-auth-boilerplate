@@ -11,8 +11,6 @@ import { v4 as uuid } from 'uuid';
 import { sendMail } from '../mails/sendMail';
 import { User } from '../entity/User';
 
-import { LogInInput } from '../graphqlTypes/LogInInput';
-import { SignUpInput } from '../graphqlTypes/SignUpInput';
 import { UserResponse } from '../graphqlTypes/UserResponse';
 import { SuccessResponse } from '../graphqlTypes/SuccessResponse';
 
@@ -24,8 +22,9 @@ const secret = process.env.SECRET as string;
 export class AuthResolver {
   @Mutation(() => SuccessResponse)
   async signUp(
-    @Arg('input')
-    { username, email, password }: SignUpInput
+    @Arg('username') username: string,
+    @Arg('email') email: string,
+    @Arg('password') password: string
   ) {
     try {
       const existingUser = await User.find({
@@ -78,7 +77,8 @@ export class AuthResolver {
 
   @Mutation(() => UserResponse)
   async logIn(
-    @Arg('input') { usernameOrEmail, password }: LogInInput,
+    @Arg('usernameOrEmail') usernameOrEmail: string,
+    @Arg('password') password: string,
     @Ctx() ctx: Context
   ) {
     try {
