@@ -48,10 +48,6 @@ export class AuthResolver {
         emailToken,
       }).save();
 
-      const emailTokenSigned = jwt.sign({ emailToken }, secret, {
-        expiresIn: '15m',
-      });
-
       const mail = {
         email: user.email,
         subject: 'Welcome to Blacklist',
@@ -59,7 +55,7 @@ export class AuthResolver {
       };
 
       const contextData = {
-        host: `${process.env.REST_API}/rest/confirmAccount?emailToken=${emailTokenSigned}`,
+        host: `${process.env.REST_API}/rest/confirmAccount?emailToken=${emailToken}`,
       };
 
       try {
