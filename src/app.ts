@@ -16,14 +16,16 @@ import { resetPasswordConfirm } from './rest/resetPasswordConfirm';
 (async () => {
   const app = express();
 
-  app.get('/confirmAccount/:emailToken', confirmAccount);
-  app.get('/refreshToken', refreshToken);
-  app.get('/refreshToken/delete', deleteRefreshToken);
-  app.get('/resetPassword/:resetPasswordToken/', resetPassword);
-  app.post('/resetPasswordConfirm/:resetPasswordToken', resetPasswordConfirm);
-
   app.use(cors({ origin: process.env.REACT_APP, credentials: true }));
   app.use(cookieParser());
+
+  app.get('/confirmAccount/:emailToken', confirmAccount);
+
+  app.get('/refreshToken', refreshToken);
+  app.delete('/refreshToken', deleteRefreshToken);
+
+  app.get('/resetPassword/:resetPasswordToken/', resetPassword);
+  app.post('/resetPasswordConfirm/:resetPasswordToken', resetPasswordConfirm);
 
   try {
     const dbOptions = await getConnectionOptions(process.env.NODE_ENV);

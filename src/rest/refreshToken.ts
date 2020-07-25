@@ -11,8 +11,8 @@ import { DecodedRefreshToken } from '../types';
 const secret = process.env.SECRET as string;
 
 export const refreshToken = async (req: Request, res: Response) => {
-  if (!req.cookies['refresh_token']) {
-    return res.status(401).send('Something went wrong');
+  if (!(req.cookies && req.cookies['refresh_token'])) {
+    return res.send('Something went wrong');
   }
 
   const refreshToken = req.cookies['refresh_token'];
