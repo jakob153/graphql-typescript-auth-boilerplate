@@ -9,7 +9,7 @@ import { AuthResolver } from './resolvers/AuthResolver';
 import { BookResolver } from './resolvers/BookResolver';
 
 import { confirmAccount } from './rest/confirmAccount';
-import { refreshToken } from './rest/refreshToken';
+import { refreshToken, deleteRefreshToken } from './rest/refreshToken';
 import { resetPassword } from './rest/resetPassword';
 import { resetPasswordConfirm } from './rest/resetPasswordConfirm';
 
@@ -18,8 +18,9 @@ import { resetPasswordConfirm } from './rest/resetPasswordConfirm';
 
   app.get('/confirmAccount/:emailToken', confirmAccount);
   app.get('/refreshToken', refreshToken);
+  app.get('/refreshToken/delete', deleteRefreshToken);
   app.get('/resetPassword/:resetPasswordToken/', resetPassword);
-  app.post('/resetPassword/:emailToken/:userId/confirm', resetPasswordConfirm);
+  app.post('/resetPasswordConfirm/:resetPasswordToken', resetPasswordConfirm);
 
   app.use(cors({ origin: process.env.REACT_APP, credentials: true }));
   app.use(cookieParser());

@@ -10,8 +10,9 @@ import { v4 as uuid } from 'uuid';
 
 import { redis } from '../redis';
 
-import { sendMail } from '../mails/sendMail';
 import { User } from '../entity/User';
+
+import { sendMail } from '../mails/sendMail';
 
 import { UserResponse } from '../graphqlTypes/UserResponse';
 import { SuccessResponse } from '../graphqlTypes/SuccessResponse';
@@ -27,7 +28,7 @@ export class AuthResolver {
     @Arg('username') username: string,
     @Arg('email') email: string,
     @Arg('password') password: string
-  ) {
+  ): Promise<SuccessResponse> {
     try {
       const existingUser = await User.find({
         where: [{ username }, { email }],
@@ -80,7 +81,7 @@ export class AuthResolver {
     @Arg('usernameOrEmail') usernameOrEmail: string,
     @Arg('password') password: string,
     @Ctx() ctx: Context
-  ) {
+  ): Promise<UserResponse> {
     try {
       const [user] = await User.find({
         where: [{ username: usernameOrEmail }, { email: usernameOrEmail }],
@@ -114,6 +115,8 @@ export class AuthResolver {
       });
 
       const refreshTokenDate = new Date();
+
+      // expire at the same time as the cache
       refreshTokenDate.setHours(refreshTokenDate.getHours() + 720);
 
       ctx.res.cookie('refresh_token', refreshTokenSigned, {
@@ -125,9 +128,11 @@ export class AuthResolver {
       });
 
       return {
-        username: user.username,
-        email: user.email,
-        authToken: authTokenSigned,
+        user: {
+          username: user.username,
+          email: user.email,
+          authToken: authTokenSigned,
+        },
       };
     } catch (error) {
       throw error;
@@ -135,17 +140,10 @@ export class AuthResolver {
   }
 
   @Mutation(() => SuccessResponse)
-  async logOut(@Ctx() ctx: Context) {
-    ctx.res.clearCookie('refresh_token', { path: '/refreshToken' });
-
-    return { success: true };
-  }
-
-  @Mutation(() => SuccessResponse)
   async resetPassword(
     @Arg('username') username: string,
     @Arg('email') email: string
-  ) {
+  ): Promise<SuccessResponse> {
     try {
       const user = await User.findOne({ email, username });
       if (!user) {

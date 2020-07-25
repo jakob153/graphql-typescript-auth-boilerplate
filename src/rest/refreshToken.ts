@@ -45,3 +45,22 @@ export const refreshToken = async (req: Request, res: Response) => {
     return res.send('Something went wrong');
   }
 };
+
+export const deleteRefreshToken = async (req: Request, res: Response) => {
+  if (!req.cookies['refresh_token']) {
+    return res.send('Something went wrong');
+  }
+  const refreshToken = req.cookies['refresh_token'];
+
+  const jwtDecoded = jwt.verify(refreshToken, secret) as DecodedRefreshToken;
+
+  if (!jwtDecoded.refreshToken) {
+    throw Error;
+  }
+
+  await redis.del(jwtDecoded.refreshToken);
+
+  res.clearCookie('refresh_token', { path: '/refreshToken' });
+
+  return res.sendStatus(200);
+};
