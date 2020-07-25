@@ -8,7 +8,7 @@ import {
 } from 'apollo-server-express';
 import { v4 as uuid } from 'uuid';
 
-import { redis } from '../redis';
+import { nodeCache } from '../nodeCache';
 
 import { User } from '../entity/User';
 
@@ -51,7 +51,7 @@ export class AuthResolver {
       }).save();
 
       // expire in 900 seconds = 15 Minutes
-      await redis.set(emailToken, user.id, 'EX', 900);
+      nodeCache.set(emailToken, user.id, 900);
 
       const mail = {
         email: user.email,
@@ -102,21 +102,15 @@ export class AuthResolver {
       }
 
       const authToken = uuid();
-      const refreshToken = uuid();
-
-      // expire refreshToken after 30 days (720 hours)
-      await redis.set(refreshToken, user.id, 'EX', 60 * 60 * 720);
 
       const authTokenSigned = jwt.sign({ authToken }, secret, {
         expiresIn: '1d',
       });
-      const refreshTokenSigned = jwt.sign({ refreshToken }, secret, {
+      const refreshTokenSigned = jwt.sign({ userId: user.id }, secret, {
         expiresIn: '722h',
       });
 
       const refreshTokenDate = new Date();
-
-      // expire the cookie at the same time as the cache
       refreshTokenDate.setHours(refreshTokenDate.getHours() + 720);
 
       ctx.res.cookie('refresh_token', refreshTokenSigned, {
@@ -140,6 +134,13 @@ export class AuthResolver {
   }
 
   @Mutation(() => SuccessResponse)
+  async logOut(@Ctx() ctx: Context) {
+    ctx.res.clearCookie('refresh_token', { path: '/refreshToken' });
+
+    return { success: true };
+  }
+
+  @Mutation(() => SuccessResponse)
   async resetPassword(
     @Arg('username') username: string,
     @Arg('email') email: string
@@ -151,7 +152,7 @@ export class AuthResolver {
       }
 
       const resetPasswordToken = uuid();
-      await redis.set(resetPasswordToken, user.id, 'EX', 900);
+      nodeCache.set(resetPasswordToken, user.id, 900);
 
       const mail = {
         email: user.email,

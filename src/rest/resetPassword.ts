@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
 import path from 'path';
 
-import { redis } from '../redis';
+import { nodeCache } from '../nodeCache';
 
-export const resetPassword = async (req: Request, res: Response) => {
+export const resetPassword = (req: Request, res: Response) => {
   const resetPasswordToken = req.params.resetPasswordToken;
-  const userId = await redis.get(resetPasswordToken);
+  const userId = nodeCache.get(resetPasswordToken);
 
   if (userId) {
     return res.sendFile(

@@ -10,7 +10,7 @@ export interface DecodedAuthToken {
 }
 
 export interface DecodedRefreshToken {
-  refreshToken?: string;
+  userId?: string;
 }
 
 export interface DecodedEmailToken {

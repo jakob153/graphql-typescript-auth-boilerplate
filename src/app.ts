@@ -9,7 +9,7 @@ import { AuthResolver } from './resolvers/AuthResolver';
 import { BookResolver } from './resolvers/BookResolver';
 
 import { confirmAccount } from './rest/confirmAccount';
-import { refreshToken, deleteRefreshToken } from './rest/refreshToken';
+import { refreshToken } from './rest/refreshToken';
 import { resetPassword } from './rest/resetPassword';
 import { confirmResetPassword } from './rest/confirmResetPassword';
 
@@ -21,9 +21,7 @@ import { confirmResetPassword } from './rest/confirmResetPassword';
   app.use(express.json());
 
   app.get('/confirmAccount/:emailToken', confirmAccount);
-
   app.get('/refreshToken', refreshToken);
-  app.delete('/refreshToken', deleteRefreshToken);
 
   app.get('/resetPassword/:resetPasswordToken', resetPassword);
   app.post('/resetPassword/:resetPasswordToken', confirmResetPassword);
