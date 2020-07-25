@@ -11,7 +11,7 @@ import { BookResolver } from './resolvers/BookResolver';
 import { confirmAccount } from './rest/confirmAccount';
 import { refreshToken, deleteRefreshToken } from './rest/refreshToken';
 import { resetPassword } from './rest/resetPassword';
-import { resetPasswordConfirm } from './rest/resetPasswordConfirm';
+import { confirmResetPassword } from './rest/confirmResetPassword';
 
 (async () => {
   const app = express();
@@ -24,8 +24,8 @@ import { resetPasswordConfirm } from './rest/resetPasswordConfirm';
   app.get('/refreshToken', refreshToken);
   app.delete('/refreshToken', deleteRefreshToken);
 
-  app.get('/resetPassword/:resetPasswordToken/', resetPassword);
-  app.post('/resetPasswordConfirm/:resetPasswordToken', resetPasswordConfirm);
+  app.get('/resetPassword/:resetPasswordToken', resetPassword);
+  app.post('/resetPassword/:resetPasswordToken', confirmResetPassword);
 
   try {
     const dbOptions = await getConnectionOptions(process.env.NODE_ENV);
