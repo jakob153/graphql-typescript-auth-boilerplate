@@ -104,8 +104,8 @@ export class AuthResolver {
       const authToken = uuid();
       const refreshToken = uuid();
 
-      // expire refreshToken after 30 days
-      await redis.set(refreshToken, user.id, 'EX', 60 * 60 * 922);
+      // expire refreshToken after 30 days (720 hours)
+      await redis.set(refreshToken, user.id, 'EX', 60 * 60 * 720);
 
       const authTokenSigned = jwt.sign({ authToken }, secret, {
         expiresIn: '1d',
@@ -116,7 +116,7 @@ export class AuthResolver {
 
       const refreshTokenDate = new Date();
 
-      // expire at the same time as the cache
+      // expire the cookie at the same time as the cache
       refreshTokenDate.setHours(refreshTokenDate.getHours() + 720);
 
       ctx.res.cookie('refresh_token', refreshTokenSigned, {

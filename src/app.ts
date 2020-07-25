@@ -18,6 +18,7 @@ import { confirmResetPassword } from './rest/confirmResetPassword';
 
   app.use(cors({ origin: process.env.REACT_APP, credentials: true }));
   app.use(cookieParser());
+  app.use(express.json());
 
   app.get('/confirmAccount/:emailToken', confirmAccount);
 

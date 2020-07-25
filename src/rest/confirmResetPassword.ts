@@ -17,7 +17,7 @@ export const confirmResetPassword = async (req: Request, res: Response) => {
 
     redis.del(resetPasswordToken);
 
-    return res.redirect(process.env.REACT_APP as string);
+    return res.json({ reactApp: process.env.REACT_APP });
   } else {
     return res.send('Something went wrong');
   }
