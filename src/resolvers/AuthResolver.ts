@@ -8,6 +8,8 @@ import {
 } from 'apollo-server-express';
 import { v4 as uuid } from 'uuid';
 
+import { redis } from '../redis';
+
 import { sendMail } from '../mails/sendMail';
 import { User } from '../entity/User';
 
@@ -45,8 +47,10 @@ export class AuthResolver {
         username,
         email,
         password: hashedPassword,
-        emailToken,
       }).save();
+
+      // expire in 900 seconds = 15 Minutes
+      await redis.set(emailToken, user.id, 'EX', 900);
 
       const mail = {
         email: user.email,
@@ -55,7 +59,7 @@ export class AuthResolver {
       };
 
       const contextData = {
-        host: `${process.env.REST_API}/rest/confirmAccount?emailToken=${emailToken}`,
+        host: `${process.env.REST_API}/confirmAccount/${emailToken}`,
       };
 
       try {
@@ -99,8 +103,8 @@ export class AuthResolver {
       const authToken = uuid();
       const refreshToken = uuid();
 
-      user.refreshToken = refreshToken;
-      user.save();
+      // expire refreshToken after 30 days
+      await redis.set(refreshToken, user.id, 'EX', 60 * 60 * 922);
 
       const authTokenSigned = jwt.sign({ authToken }, secret, {
         expiresIn: '1d',
@@ -109,8 +113,6 @@ export class AuthResolver {
         expiresIn: '722h',
       });
 
-      user.authToken = authTokenSigned;
-
       const refreshTokenDate = new Date();
       refreshTokenDate.setHours(refreshTokenDate.getHours() + 720);
 
@@ -118,11 +120,15 @@ export class AuthResolver {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         expires: refreshTokenDate,
-        path: '/rest/refreshToken',
+        path: '/refreshToken',
         sameSite: process.env.NODE_ENV === 'production' && 'none',
       });
 
-      return { user };
+      return {
+        username: user.username,
+        email: user.email,
+        authToken: authTokenSigned,
+      };
     } catch (error) {
       throw error;
     }
@@ -142,14 +148,12 @@ export class AuthResolver {
   ) {
     try {
       const user = await User.findOne({ email, username });
-
       if (!user) {
         throw new UserInputError('User not found');
       }
 
-      const emailToken = jwt.sign({ emailToken: user.emailToken }, secret, {
-        expiresIn: '15m',
-      });
+      const resetPasswordToken = uuid();
+      await redis.set(resetPasswordToken, user.id, 'EX', 900);
 
       const mail = {
         email: user.email,
@@ -158,7 +162,7 @@ export class AuthResolver {
       };
 
       const contextData = {
-        host: `${process.env.REST_API}/rest/resetPassword/${emailToken}/${user.id}`,
+        host: `${process.env.REST_API}/resetPassword/${resetPasswordToken}`,
       };
 
       await sendMail(mail, contextData);

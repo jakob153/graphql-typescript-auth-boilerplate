@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { v4 as uuid } from 'uuid';
 
+import { redis } from '../redis';
+
 import { User } from '../entity/User';
 import { DecodedRefreshToken } from '../types';
 
@@ -9,24 +11,23 @@ const secret = process.env.SECRET as string;
 
 export const refreshToken = async (req: Request, res: Response) => {
   if (!req.cookies['refresh_token']) {
-    res.status(401).send('No Refresh Token Provided');
-    return;
+    return res.status(401).send('Something went wrong');
   }
+
   const refreshToken = req.cookies['refresh_token'];
+  const jwtDecoded = jwt.verify(refreshToken, secret) as DecodedRefreshToken;
 
-  try {
-    const jwtDecoded = jwt.verify(refreshToken, secret) as DecodedRefreshToken;
+  if (!jwtDecoded.refreshToken) {
+    throw Error;
+  }
 
-    if (!jwtDecoded.refreshToken) {
-      throw Error;
-    }
+  const userId = await redis.get(jwtDecoded.refreshToken);
 
-    const user = await User.findOne({
-      refreshToken: jwtDecoded.refreshToken,
-    });
+  if (userId) {
+    const user = await User.findOne({ id: parseInt(userId) });
 
     if (!user) {
-      throw Error;
+      return res.send('Someting went wrong');
     }
 
     const newAuthToken = uuid();
@@ -39,9 +40,8 @@ export const refreshToken = async (req: Request, res: Response) => {
       email: user.email,
       authToken: authTokenSigned,
     };
-
-    res.send(lightUser);
-  } catch (error) {
-    res.status(401).send('Token Invalid/Expired');
+    return res.send(lightUser);
+  } else {
+    return res.send('Something went wrong');
   }
 };

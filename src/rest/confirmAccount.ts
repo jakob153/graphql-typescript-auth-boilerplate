@@ -1,27 +1,19 @@
 import { Request, Response } from 'express';
 
+import { redis } from '../redis';
+
 import { User } from '../entity/User';
 
 export const confirmAccount = async (req: Request, res: Response) => {
-  if (!req.query.emailToken) {
-    res.status(404).send('No Email Token Provided');
-    return;
-  }
+  const { emailToken } = req.params;
+  const userId = await redis.get(emailToken);
 
-  try {
-    const emailToken = req.query.emailToken;
-    const user = await User.findOne({ emailToken });
+  if (userId) {
+    await User.update({ id: parseInt(userId) }, { verified: true });
+    await redis.del(emailToken);
 
-    if (!user) {
-      res.redirect(`${process.env.REACT_APP}/login?confirmAccount=false`);
-      return;
-    }
-
-    user.verified = true;
-    user.save();
-
-    res.redirect(`${process.env.REACT_APP}/login?confirmAccount=true`);
-  } catch (error) {
-    res.status(400).send('Something went wrong');
+    return res.redirect(`${process.env.REACT_APP}/login?confirmAccount=true`);
+  } else {
+    return res.send('Something went wrong');
   }
 };

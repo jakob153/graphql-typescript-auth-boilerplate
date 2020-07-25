@@ -15,19 +15,14 @@ import { resetPasswordConfirm } from './rest/resetPasswordConfirm';
 
 (async () => {
   const app = express();
-  const router = express.Router();
 
-  router.get('/confirmAccount', confirmAccount);
-  router.get('/refreshToken', refreshToken);
-  router.get('/resetPassword/:emailToken/:userId', resetPassword);
-  router.post(
-    '/resetPassword/:emailToken/:userId/confirm',
-    resetPasswordConfirm
-  );
+  app.get('/confirmAccount/:emailToken', confirmAccount);
+  app.get('/refreshToken', refreshToken);
+  app.get('/resetPassword/:resetPasswordToken/', resetPassword);
+  app.post('/resetPassword/:emailToken/:userId/confirm', resetPasswordConfirm);
 
   app.use(cors({ origin: process.env.REACT_APP, credentials: true }));
   app.use(cookieParser());
-  app.use('/rest', router);
 
   try {
     const dbOptions = await getConnectionOptions(process.env.NODE_ENV);

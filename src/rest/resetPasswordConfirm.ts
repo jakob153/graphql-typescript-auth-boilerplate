@@ -1,26 +1,24 @@
 import { Request, Response } from 'express';
-import { v4 as uuid } from 'uuid';
+import bcrypt from 'bcryptjs';
+
+import { redis } from '../redis';
 
 import { User } from '../entity/User';
 
 export const resetPasswordConfirm = async (req: Request, res: Response) => {
-  try {
-    const emailToken = req.params['emailToken'];
-    const userId = req.params['userId'];
-    const user = await User.findOne({ emailToken, id: parseInt(userId) });
+  const resetPasswordToken = req.params.resetPasswordToken;
+  const newPassword = req.body.newPassword;
+  const userId = await redis.get(resetPasswordToken);
 
-    if (!user) {
-      res.sendStatus(502);
-      return;
-    }
+  if (userId && newPassword) {
+    const hashPassword = bcrypt.hashSync(newPassword, 12);
 
-    const newEmailToken = uuid();
+    await User.update({ id: parseInt(userId) }, { password: hashPassword });
 
-    user.emailToken = newEmailToken;
-    user.save();
+    redis.del(resetPasswordToken);
 
-    res.json({ REACT_APP: process.env.REACT_APP });
-  } catch (error) {
-    res.sendStatus(502);
+    return res.redirect(process.env.REACT_APP as string);
+  } else {
+    return res.send('Something went wrong');
   }
 };
