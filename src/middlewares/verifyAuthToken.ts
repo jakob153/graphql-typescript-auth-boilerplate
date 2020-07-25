@@ -1,7 +1,7 @@
 import { MiddlewareFn } from 'type-graphql';
 import jwt from 'jsonwebtoken';
 import { Context, DecodedAuthToken } from '../types';
-import { AuthenticationError } from 'apollo-server-express';
+import { AuthenticationError, ApolloError } from 'apollo-server-express';
 
 const secret = process.env.SECRET as string;
 
@@ -9,17 +9,18 @@ export const verifyAuthToken: MiddlewareFn<Context> = async (
   { context },
   next
 ) => {
-  try {
-    if (!context.req.headers['authorization']) {
-      throw new AuthenticationError('Not Authenticated');
-    }
+  if (!context.req.headers['authorization']) {
+    throw new AuthenticationError('Not Authenticated');
+  }
 
-    const authToken = context.req.headers['authorization'].split('Bearer ')[1];
+  const authToken = context.req.headers['authorization'].split('Bearer ')[1];
+
+  try {
     const decodedToken = jwt.verify(authToken, secret) as DecodedAuthToken;
     context.res.locals.authToken = decodedToken.authToken;
 
     return next();
   } catch (error) {
-    throw error;
+    return new ApolloError('Something went wrong');
   }
 };
