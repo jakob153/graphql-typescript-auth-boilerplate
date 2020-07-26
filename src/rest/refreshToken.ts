@@ -30,7 +30,7 @@ export const refreshToken = async (req: Request, res: Response) => {
 
     const newAuthToken = uuid();
     const authTokenSigned = jwt.sign({ authToken: newAuthToken }, secret, {
-      expiresIn: '1d',
+      expiresIn: '24h',
     });
 
     const lightUser = {

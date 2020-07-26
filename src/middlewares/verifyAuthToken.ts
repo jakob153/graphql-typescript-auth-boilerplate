@@ -1,7 +1,8 @@
 import { MiddlewareFn } from 'type-graphql';
 import jwt from 'jsonwebtoken';
-import { Context, DecodedAuthToken } from '../types';
 import { AuthenticationError, ApolloError } from 'apollo-server-express';
+
+import { Context, DecodedAuthToken } from '../types';
 
 const secret = process.env.SECRET as string;
 

@@ -104,7 +104,7 @@ export class AuthResolver {
       const authToken = uuid();
 
       const authTokenSigned = jwt.sign({ authToken }, secret, {
-        expiresIn: '1d',
+        expiresIn: '24h',
       });
       const refreshTokenSigned = jwt.sign({ userId: user.id }, secret, {
         expiresIn: '722h',
