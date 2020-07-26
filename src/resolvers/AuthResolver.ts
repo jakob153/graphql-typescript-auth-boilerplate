@@ -118,7 +118,7 @@ export class AuthResolver {
         secure: process.env.NODE_ENV === 'production',
         expires: refreshTokenDate,
         path: '/refreshToken',
-        sameSite: process.env.NODE_ENV === 'production' && 'none',
+        sameSite: true,
       });
 
       return {

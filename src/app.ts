@@ -16,7 +16,7 @@ import { confirmResetPassword } from './rest/confirmResetPassword';
 (async () => {
   const app = express();
 
-  app.use(cors({ origin: process.env.REACT_APP, credentials: true }));
+  app.use(cors({ credentials: true }));
   app.use(cookieParser());
   app.use(express.json());
 
@@ -46,7 +46,7 @@ import { confirmResetPassword } from './rest/confirmResetPassword';
 
     apolloServer.applyMiddleware({
       app,
-      cors: { origin: process.env.REACT_APP, credentials: true },
+      cors: { credentials: true },
     });
 
     app.listen(port, () => {
