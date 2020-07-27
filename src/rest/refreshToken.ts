@@ -13,7 +13,7 @@ export const refreshToken = async (req: Request, res: Response) => {
     !(
       req.cookies &&
       req.cookies['refresh_token'] &&
-      (await redis.get(req.cookies['refresh_token']))
+      (await redis.get(req.cookies['refresh_token'])) !== null
     )
   ) {
     return res.sendStatus(401);
@@ -40,4 +40,18 @@ export const refreshToken = async (req: Request, res: Response) => {
   } catch (error) {
     return res.sendStatus(401);
   }
+};
+
+export const deleteRefreshToken = async (req: Request, res: Response) => {
+  if (!(req.cookies && req.cookies['refresh_token'])) {
+    return res.sendStatus(401);
+  }
+
+  const refreshToken = req.cookies['refresh_token'];
+
+  await redis.del(refreshToken);
+
+  res.clearCookie('refresh_token', { path: '/refreshToken' });
+
+  return res.sendStatus(204);
 };

@@ -102,17 +102,17 @@ export class AuthResolver {
       }
 
       const authToken = uuid();
-      const authTokenSigned = jwt.sign(
-        { authToken, username: user.username },
+      const authTokenSigned = jwt.sign({ authToken }, secret, {
+        expiresIn: '24h',
+      });
+
+      const refreshTokenSigned = jwt.sign(
+        { username: user.username, email: user.email },
         secret,
         {
-          expiresIn: '24h',
+          expiresIn: '722h',
         }
       );
-
-      const refreshTokenSigned = jwt.sign({ username: user.username }, secret, {
-        expiresIn: '722h',
-      });
 
       // 1440 hours = 60 days
       await redis.set(refreshTokenSigned, '', 'EX', 60 * 60 * 1440);
@@ -138,19 +138,6 @@ export class AuthResolver {
     } catch (error) {
       throw error;
     }
-  }
-
-  @Mutation(() => SuccessResponse)
-  async logOut(@Ctx() ctx: Context): Promise<SuccessResponse> {
-    if (!(ctx.req.cookies && ctx.req.cookies['refresh_token'])) {
-      return { success: false };
-    }
-
-    await redis.del(ctx.req.cookies['refresh_token']);
-
-    ctx.res.clearCookie('refresh_token', { path: '/refreshToken' });
-
-    return { success: true };
   }
 
   @Mutation(() => SuccessResponse)
