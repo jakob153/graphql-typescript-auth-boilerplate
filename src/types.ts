@@ -7,9 +7,9 @@ export interface Context {
 
 export interface DecodedAuthToken {
   authToken: string;
-  username: string;
 }
 
 export interface DecodedRefreshToken {
   username: string;
+  email: string;
 }

@@ -8,7 +8,7 @@ import {
 } from 'apollo-server-express';
 import { v4 as uuid } from 'uuid';
 
-import { nodeCache } from '../nodeCache';
+import { redis } from '../redis';
 
 import { User } from '../entity/User';
 
@@ -51,7 +51,7 @@ export class AuthResolver {
       }).save();
 
       // expire in 900 seconds = 15 Minutes
-      nodeCache.set(emailToken, user.id, 900);
+      redis.set(emailToken, user.id, 'EX', 900);
 
       const mail = {
         email: user.email,
@@ -102,9 +102,6 @@ export class AuthResolver {
       }
 
       const authToken = uuid();
-
-      nodeCache.set(user.username, authToken, 60 * 60 * 24);
-
       const authTokenSigned = jwt.sign(
         { authToken, username: user.username },
         secret,
@@ -112,12 +109,16 @@ export class AuthResolver {
           expiresIn: '24h',
         }
       );
+
       const refreshTokenSigned = jwt.sign({ username: user.username }, secret, {
         expiresIn: '722h',
       });
 
+      // 1440 hours = 60 days
+      await redis.set(refreshTokenSigned, '', 'EX', 60 * 60 * 1440);
+
       const refreshTokenDate = new Date();
-      refreshTokenDate.setHours(refreshTokenDate.getHours() + 720);
+      refreshTokenDate.setHours(refreshTokenDate.getHours() + 1440);
 
       ctx.res.cookie('refresh_token', refreshTokenSigned, {
         httpOnly: true,
@@ -140,7 +141,13 @@ export class AuthResolver {
   }
 
   @Mutation(() => SuccessResponse)
-  async logOut(@Ctx() ctx: Context) {
+  async logOut(@Ctx() ctx: Context): Promise<SuccessResponse> {
+    if (!(ctx.req.cookies && ctx.req.cookies['refresh_token'])) {
+      return { success: false };
+    }
+
+    await redis.del(ctx.req.cookies['refresh_token']);
+
     ctx.res.clearCookie('refresh_token', { path: '/refreshToken' });
 
     return { success: true };
@@ -158,7 +165,8 @@ export class AuthResolver {
       }
 
       const resetPasswordToken = uuid();
-      nodeCache.set(resetPasswordToken, user.id, 900);
+
+      await redis.set(resetPasswordToken, user.id, 'EX', 900);
 
       const mail = {
         email: user.email,

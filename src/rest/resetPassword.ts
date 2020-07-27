@@ -1,17 +1,17 @@
 import { Request, Response } from 'express';
 import path from 'path';
 
-import { nodeCache } from '../nodeCache';
+import { redis } from '../redis';
 
-export const resetPassword = (req: Request, res: Response) => {
+export const resetPassword = async (req: Request, res: Response) => {
   const resetPasswordToken = req.params.resetPasswordToken;
-  const userId = nodeCache.get(resetPasswordToken);
+  const userId = await redis.get(resetPasswordToken);
 
   if (userId) {
     return res.sendFile(
       path.resolve(`${__dirname}/../resetPassword/resetPassword.html`)
     );
   } else {
-    return res.send('Something went wrong!');
+    return res.sendStatus(401);
   }
 };
