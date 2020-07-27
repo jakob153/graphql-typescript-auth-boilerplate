@@ -6,13 +6,10 @@ export interface Context {
 }
 
 export interface DecodedAuthToken {
-  authToken?: string;
+  authToken: string;
+  username: string;
 }
 
 export interface DecodedRefreshToken {
-  userId?: string;
-}
-
-export interface DecodedEmailToken {
-  emailToken?: string;
+  username: string;
 }

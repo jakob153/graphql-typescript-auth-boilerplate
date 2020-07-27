@@ -103,10 +103,16 @@ export class AuthResolver {
 
       const authToken = uuid();
 
-      const authTokenSigned = jwt.sign({ authToken }, secret, {
-        expiresIn: '24h',
-      });
-      const refreshTokenSigned = jwt.sign({ userId: user.id }, secret, {
+      nodeCache.set(user.username, authToken, 60 * 60 * 24);
+
+      const authTokenSigned = jwt.sign(
+        { authToken, username: user.username },
+        secret,
+        {
+          expiresIn: '24h',
+        }
+      );
+      const refreshTokenSigned = jwt.sign({ username: user.username }, secret, {
         expiresIn: '722h',
       });
 

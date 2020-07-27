@@ -5,6 +5,7 @@ import { v4 as uuid } from 'uuid';
 import { User } from '../entity/User';
 
 import { DecodedRefreshToken } from '../types';
+import { nodeCache } from '../nodeCache';
 
 const secret = process.env.SECRET as string;
 
@@ -17,21 +18,23 @@ export const refreshToken = async (req: Request, res: Response) => {
 
   try {
     const jwtDecoded = jwt.verify(refreshToken, secret) as DecodedRefreshToken;
-
-    if (!jwtDecoded.userId) {
-      throw Error;
-    }
-
-    const user = await User.findOne({ id: parseInt(jwtDecoded.userId) });
+    const user = await User.findOne({ username: jwtDecoded.username });
 
     if (!user) {
       throw Error;
     }
 
     const newAuthToken = uuid();
-    const authTokenSigned = jwt.sign({ authToken: newAuthToken }, secret, {
-      expiresIn: '24h',
-    });
+
+    nodeCache.set(user.username, newAuthToken, 60 * 60 * 24);
+
+    const authTokenSigned = jwt.sign(
+      { authToken: newAuthToken, username: user.username },
+      secret,
+      {
+        expiresIn: '24h',
+      }
+    );
 
     const lightUser = {
       username: user.username,
