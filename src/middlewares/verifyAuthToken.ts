@@ -4,8 +4,6 @@ import jwt from 'jsonwebtoken';
 
 import { Context } from '../types';
 
-const secret = process.env.AUTH_TOKEN_SECRET as string;
-
 export const verifyAuthToken: MiddlewareFn<Context> = async (
   { context },
   next
@@ -17,7 +15,7 @@ export const verifyAuthToken: MiddlewareFn<Context> = async (
   const authToken = context.req.headers['authorization'].split('Bearer ')[1];
 
   try {
-    jwt.verify(authToken, secret);
+    jwt.verify(authToken, process.env.AUTH_TOKEN_SECRET as string);
 
     return next();
   } catch (error) {
