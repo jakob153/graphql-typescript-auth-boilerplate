@@ -6,8 +6,6 @@ import { redis } from '../redis';
 
 import { DecodedRefreshToken } from '../types';
 
-const secret = process.env.SECRET as string;
-
 export const refreshToken = async (req: Request, res: Response) => {
   if (
     !(
@@ -22,13 +20,20 @@ export const refreshToken = async (req: Request, res: Response) => {
   const refreshToken = req.cookies['refresh_token'];
 
   try {
-    const jwtDecoded = jwt.verify(refreshToken, secret) as DecodedRefreshToken;
+    const jwtDecoded = jwt.verify(
+      refreshToken,
+      process.env.REFRESH_TOKEN_SECRET as string
+    ) as DecodedRefreshToken;
 
     const newAuthToken = uuid();
 
-    const authTokenSigned = jwt.sign({ authToken: newAuthToken }, secret, {
-      expiresIn: '24h',
-    });
+    const authTokenSigned = jwt.sign(
+      { authToken: newAuthToken },
+      process.env.AUTH_TOKEN_SECRET as string,
+      {
+        expiresIn: '24h',
+      }
+    );
 
     const lightUser = {
       username: jwtDecoded.username,

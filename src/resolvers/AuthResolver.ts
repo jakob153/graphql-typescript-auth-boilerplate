@@ -16,8 +16,6 @@ import { SuccessResponse } from '../graphqlTypes/SuccessResponse';
 
 import { Context } from '../types';
 
-const secret = process.env.SECRET as string;
-
 @Resolver()
 export class AuthResolver {
   @Mutation(() => SuccessResponse)
@@ -98,13 +96,17 @@ export class AuthResolver {
     }
 
     const authToken = uuid();
-    const authTokenSigned = jwt.sign({ authToken }, secret, {
-      expiresIn: '24h',
-    });
+    const authTokenSigned = jwt.sign(
+      { authToken },
+      process.env.AUTH_TOKEN_SECRET as string,
+      {
+        expiresIn: '24h',
+      }
+    );
 
     const refreshTokenSigned = jwt.sign(
       { username: user.username, email: user.email },
-      secret,
+      process.env.REFRESH_TOKEN_SECRET as string,
       {
         expiresIn: '722h',
       }
