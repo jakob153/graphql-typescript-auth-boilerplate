@@ -27,34 +27,30 @@ import { confirmResetPassword } from './rest/confirmResetPassword';
   app.get('/resetPassword/:resetPasswordToken', resetPassword);
   app.post('/resetPassword/:resetPasswordToken', confirmResetPassword);
 
-  try {
-    const dbOptions = await getConnectionOptions(process.env.NODE_ENV);
+  const dbOptions = await getConnectionOptions(process.env.NODE_ENV);
 
-    await createConnection({ ...dbOptions, name: 'default' });
+  await createConnection({ ...dbOptions, name: 'default' });
 
-    const port = process.env.PORT || 4000;
+  const port = process.env.PORT || 4000;
 
-    const schema = await buildSchema({
-      resolvers: [AuthResolver, BookResolver],
-      validate: false,
-    });
+  const schema = await buildSchema({
+    resolvers: [AuthResolver, BookResolver],
+    validate: false,
+  });
 
-    const apolloServer = new ApolloServer({
-      schema,
-      context: ({ req, res }) => ({ req, res }),
-      debug: false,
-    });
+  const apolloServer = new ApolloServer({
+    schema,
+    context: ({ req, res }) => ({ req, res }),
+    debug: false,
+  });
 
-    apolloServer.applyMiddleware({
-      app,
-      cors: { credentials: true },
-    });
+  apolloServer.applyMiddleware({
+    app,
+    cors: { credentials: true },
+  });
 
-    app.listen(port, () => {
-      // eslint-disable-next-line no-console
-      console.log(`server started at http://localhost:${port}/graphql`);
-    });
-  } catch (error) {
-    console.error(error);
-  }
+  app.listen(port, () => {
+    // eslint-disable-next-line no-console
+    console.log(`server started at http://localhost:${port}/graphql`);
+  });
 })();

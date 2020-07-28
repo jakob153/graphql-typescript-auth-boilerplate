@@ -19,8 +19,8 @@ export const verifyAuthToken: MiddlewareFn<Context> = async (
   try {
     jwt.verify(authToken, secret);
 
-    next();
+    return next();
   } catch (error) {
-    return new ApolloError('Something went wrong');
+    return new ApolloError('Forbidden');
   }
 };
