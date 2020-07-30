@@ -31,7 +31,7 @@ export const refreshToken = async (req: Request, res: Response) => {
       { authToken: newAuthToken },
       process.env.AUTH_TOKEN_SECRET as string,
       {
-        expiresIn: '15m',
+        expiresIn: '1h',
       }
     );
 

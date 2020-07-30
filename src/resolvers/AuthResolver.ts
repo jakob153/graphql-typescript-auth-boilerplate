@@ -100,7 +100,7 @@ export class AuthResolver {
       { authToken },
       process.env.AUTH_TOKEN_SECRET as string,
       {
-        expiresIn: '15m',
+        expiresIn: '1h',
       }
     );
 
@@ -108,7 +108,7 @@ export class AuthResolver {
       { username: user.username, email: user.email },
       process.env.REFRESH_TOKEN_SECRET as string,
       {
-        expiresIn: '722h',
+        expiresIn: '60d',
       }
     );
 
