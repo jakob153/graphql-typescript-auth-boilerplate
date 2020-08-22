@@ -13,10 +13,15 @@ import { deleteRefreshToken, refreshToken } from './rest/refreshToken';
 import { resetPassword } from './rest/resetPassword';
 import { confirmResetPassword } from './rest/confirmResetPassword';
 
+const corsOptions =
+  process.env.NODE_ENV === 'development'
+    ? { credentials: true, origin: process.env.FRONTEND }
+    : { credentials: true };
+
 (async () => {
   const app = express();
 
-  app.use(cors({ credentials: true }));
+  app.use(cors(corsOptions));
   app.use(cookieParser());
   app.use(express.json());
 
@@ -46,7 +51,7 @@ import { confirmResetPassword } from './rest/confirmResetPassword';
 
   apolloServer.applyMiddleware({
     app,
-    cors: { credentials: true },
+    cors: corsOptions,
   });
 
   app.listen(port, () => {

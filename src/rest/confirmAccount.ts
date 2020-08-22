@@ -13,7 +13,7 @@ export const confirmAccount = async (req: Request, res: Response) => {
 
     redis.del(emailToken);
 
-    return res.redirect(`${process.env.REACT_APP}/login?confirmAccount=true`);
+    return res.redirect(`${process.env.FRONTEND}/login?confirmAccount=true`);
   } else {
     return res.sendStatus(401);
   }
