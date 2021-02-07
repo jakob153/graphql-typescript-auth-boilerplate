@@ -1,10 +1,10 @@
 import { Query, Resolver, UseMiddleware } from 'type-graphql';
-import { verifyAuthToken } from '../middlewares/verifyAuthToken';
+import { verifySession } from '../middlewares/verifySession';
 
 @Resolver()
 export class BookResolver {
   @Query(() => String)
-  @UseMiddleware(verifyAuthToken)
+  @UseMiddleware(verifySession)
   book() {
     return 'The Republic';
   }

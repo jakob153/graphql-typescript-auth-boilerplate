@@ -1,15 +1,18 @@
 import express from 'express';
+import session from 'express-session';
+import connectRedis from 'connect-redis';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { createConnection, getConnectionOptions } from 'typeorm';
 import { ApolloServer } from 'apollo-server-express';
 import { buildSchema } from 'type-graphql';
 
+import { redis } from './redis';
+
 import { AuthResolver } from './resolvers/AuthResolver';
 import { BookResolver } from './resolvers/BookResolver';
 
 import { confirmAccount } from './rest/confirmAccount';
-import { deleteRefreshToken, refreshToken } from './rest/refreshToken';
 import { resetPassword } from './rest/resetPassword';
 import { confirmResetPassword } from './rest/confirmResetPassword';
 
@@ -20,15 +23,19 @@ const corsOptions =
 
 (async () => {
   const app = express();
+  const redisStore = connectRedis(session);
 
   app.use(cors(corsOptions));
   app.use(cookieParser());
   app.use(express.json());
+  app.use(
+    session({
+      store: new redisStore({ client: redis }),
+      secret: 'test',
+    })
+  );
 
   app.get('/confirmAccount/:emailToken', confirmAccount);
-  app.get('/refreshToken', refreshToken);
-  app.delete('/refreshToken', deleteRefreshToken);
-
   app.get('/resetPassword/:resetPasswordToken', resetPassword);
   app.post('/resetPassword/:resetPasswordToken', confirmResetPassword);
 

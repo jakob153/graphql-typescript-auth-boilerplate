@@ -18,9 +18,6 @@ export class User extends BaseEntity {
   @IsEmail()
   email: string;
 
-  @Field()
-  authToken: string;
-
   @Column()
   @Length(6)
   password: string;

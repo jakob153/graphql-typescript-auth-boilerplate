@@ -1,4 +1,3 @@
-import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { Arg, Ctx, Mutation, Resolver } from 'type-graphql';
 import { UserInputError, AuthenticationError } from 'apollo-server-express';
@@ -36,8 +35,6 @@ export class AuthResolver {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    const emailToken = uuid();
-
     const user = User.create({
       username,
       email,
@@ -52,6 +49,8 @@ export class AuthResolver {
     }
 
     await user.save();
+
+    const emailToken = uuid();
 
     // expire in 900 seconds = 15 Minutes
     redis.set(emailToken, user.id, 'EX', 900);
@@ -95,43 +94,28 @@ export class AuthResolver {
       throw new UserInputError('Invalid Email/Password');
     }
 
-    const authToken = uuid();
-    const authTokenSigned = jwt.sign(
-      { authToken },
-      process.env.AUTH_TOKEN_SECRET as string,
-      {
-        expiresIn: '1h',
-      }
-    );
-
-    const refreshTokenSigned = jwt.sign(
-      { username: user.username, email: user.email },
-      process.env.REFRESH_TOKEN_SECRET as string,
-      {
-        expiresIn: '60d',
-      }
-    );
-
-    // 1440 hours = 60 days
-    await redis.set(refreshTokenSigned, '', 'EX', 60 * 60 * 1440);
-
-    const refreshTokenDate = new Date();
-    refreshTokenDate.setHours(refreshTokenDate.getHours() + 1440);
-
-    ctx.res.cookie('refresh_token', refreshTokenSigned, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      expires: refreshTokenDate,
-      path: '/refreshToken',
-      sameSite: true,
-    });
+    ctx.req.session.id = user.id.toString();
 
     return {
       user: {
         username: user.username,
         email: user.email,
-        authToken: authTokenSigned,
       },
+    };
+  }
+
+  @Mutation(() => SuccessResponse)
+  async logOut(@Ctx() ctx: Context): Promise<SuccessResponse> {
+    ctx.req.session.destroy((err) => {
+      if (err) {
+        return {
+          success: false,
+        };
+      }
+    });
+
+    return {
+      success: true,
     };
   }
 

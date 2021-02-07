@@ -4,7 +4,6 @@ import { User } from '../entity/User';
 interface UserResponseData {
   username: string;
   email: string;
-  authToken: string;
 }
 
 @ObjectType()
