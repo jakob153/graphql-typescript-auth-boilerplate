@@ -44,7 +44,6 @@ export class AuthResolver {
     try {
       await validateOrReject(user);
     } catch (error) {
-      console.log(error);
       return { success: false };
     }
 
@@ -94,7 +93,7 @@ export class AuthResolver {
       throw new UserInputError('Invalid Email/Password');
     }
 
-    ctx.req.session.id = user.id.toString();
+    ctx.req.session.userId = user.id;
 
     return {
       user: {

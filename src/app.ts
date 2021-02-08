@@ -16,6 +16,12 @@ import { confirmAccount } from './rest/confirmAccount';
 import { resetPassword } from './rest/resetPassword';
 import { confirmResetPassword } from './rest/confirmResetPassword';
 
+declare module 'express-session' {
+  interface SessionData {
+    userId: number;
+  }
+}
+
 const corsOptions =
   process.env.NODE_ENV === 'development'
     ? { credentials: true, origin: process.env.FRONTEND }
@@ -24,6 +30,7 @@ const corsOptions =
 (async () => {
   const app = express();
   const redisStore = connectRedis(session);
+  const maxMonthOfSession = 60;
 
   app.use(cors(corsOptions));
   app.use(cookieParser());
@@ -32,6 +39,13 @@ const corsOptions =
     session({
       store: new redisStore({ client: redis }),
       secret: 'test',
+      cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: true,
+        maxAge: maxMonthOfSession * 24 * 60 * 60 * 1000,
+      },
+      resave: false,
+      saveUninitialized: false,
     })
   );
 
