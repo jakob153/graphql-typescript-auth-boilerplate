@@ -26,7 +26,7 @@ const corsOptions =
 (async () => {
   const app = express();
   const redisStore = connectRedis(session);
-  const maxMonthOfSession = 60;
+  const maxDaysOfSession = 60;
 
   app.use(cors(corsOptions));
   app.use(cookieParser());
@@ -38,7 +38,7 @@ const corsOptions =
       cookie: {
         secure: process.env.NODE_ENV === 'production',
         sameSite: true,
-        maxAge: maxMonthOfSession * 24 * 60 * 60 * 1000,
+        maxAge: maxDaysOfSession * 24 * 60 * 60 * 1000,
       },
       resave: false,
       saveUninitialized: false,
