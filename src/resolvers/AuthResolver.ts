@@ -48,7 +48,7 @@ export class AuthResolver {
 
     await user.save();
 
-    const emailToken = uuid();
+    const emailToken = `emailToken: ${uuid()}`;
 
     // expire in 900 seconds = 15 Minutes
     redis.set(emailToken, user.id, 'EX', 900);
@@ -136,7 +136,7 @@ export class AuthResolver {
 
   @Mutation(() => Boolean)
   async confirmAccount(emailToken: string): Promise<boolean> {
-    const userId = await redis.get(emailToken);
+    const userId = await redis.get(`emailToken: ${emailToken}`);
 
     if (!userId) {
       return false;
@@ -157,7 +157,7 @@ export class AuthResolver {
       throw new UserInputError('User not found');
     }
 
-    const resetPasswordToken = uuid();
+    const resetPasswordToken = `resetPasswordToken: ${uuid()}`;
 
     await redis.set(resetPasswordToken, user.id, 'EX', 900);
 
@@ -176,7 +176,7 @@ export class AuthResolver {
     @Arg('newPassword') newPassword: string,
     @Arg('resetPasswordToken') resetPasswordToken: string
   ): Promise<boolean> {
-    const userId = await redis.get(resetPasswordToken);
+    const userId = await redis.get(`resetPasswordToken: ${resetPasswordToken}`);
 
     if (!userId) {
       return false;
