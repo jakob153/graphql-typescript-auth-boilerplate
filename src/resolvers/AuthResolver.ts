@@ -54,17 +54,12 @@ export class AuthResolver {
     // expire in 900 seconds = 15 Minutes
     redis.set(emailToken, user.id, 'EX', 900);
 
-    const mail = {
-      email: user.email,
-      subject: 'Welcome to Corperation',
-      templateFilename: 'confirmAccount',
-    };
-
-    const contextData = {
-      host: `${process.env.BACKEND}/confirmAccount/${emailToken}`,
-    };
-
-    sendMail(mail, contextData);
+    sendMail(
+      user.email,
+      'Welcome to Corperation',
+      'confirmAccount',
+      `${process.env.FRONTEND}/confirmAccount/${emailToken}`
+    );
 
     return { success: true };
   }
@@ -171,17 +166,12 @@ export class AuthResolver {
 
     await redis.set(resetPasswordToken, user.id, 'EX', 900);
 
-    const mail = {
-      email: user.email,
-      subject: 'Reset Password',
-      templateFilename: 'resetPassword',
-    };
-
-    const contextData = {
-      host: `${process.env.BACKEND}/resetPassword/${resetPasswordToken}`,
-    };
-
-    await sendMail(mail, contextData);
+    await sendMail(
+      user.email,
+      'Reset Password',
+      'resetPassword',
+      `${process.env.FRONTEND}/resetPassword/${resetPasswordToken}`
+    );
 
     return { success: true };
   }

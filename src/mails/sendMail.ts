@@ -2,17 +2,12 @@ import nodemailer from 'nodemailer';
 import handlebars from 'handlebars';
 import fs from 'fs';
 
-interface Mail {
-  email: string;
-  subject: string;
-  templateFilename: string;
-}
-
-interface ContextData {
-  host?: string;
-}
-
-export const sendMail = async (mail: Mail, contextData: ContextData) => {
+export const sendMail = async (
+  email: string,
+  subject: string,
+  templateFilename: string,
+  host: string
+) => {
   try {
     const account = await nodemailer.createTestAccount();
 
@@ -27,16 +22,16 @@ export const sendMail = async (mail: Mail, contextData: ContextData) => {
     });
 
     const templateAsString = fs.readFileSync(
-      `${__dirname}/${mail.templateFilename}.handlebars`,
+      `${__dirname}/${templateFilename}.handlebars`,
       'utf-8'
     );
     const hbs = handlebars.compile(templateAsString);
-    const compiledMail = hbs({ ...contextData, email: mail.email });
+    const compiledMail = hbs({ host, email });
 
     const mailOptions = {
       from: process.env.MAIL,
-      to: mail.email,
-      subject: mail.subject,
+      to: email,
+      subject: subject,
       html: compiledMail,
     };
 
