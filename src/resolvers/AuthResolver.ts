@@ -11,18 +11,17 @@ import { User } from '../entity/User';
 import { sendMail } from '../mails/sendMail';
 
 import { UserResponse } from '../graphqlTypes/UserResponse';
-import { SuccessResponse } from '../graphqlTypes/SuccessResponse';
 
 import { Context } from '../types';
 
 @Resolver()
 export class AuthResolver {
-  @Mutation(() => SuccessResponse)
+  @Mutation(() => Boolean)
   async signUp(
     @Arg('username') username: string,
     @Arg('email') email: string,
     @Arg('password') password: string
-  ): Promise<SuccessResponse> {
+  ): Promise<boolean> {
     const existingUser = await User.find({
       where: [{ username }, { email }],
     });
@@ -44,7 +43,7 @@ export class AuthResolver {
     try {
       await validateOrReject(user);
     } catch (error) {
-      return { success: false };
+      return false;
     }
 
     await user.save();
@@ -61,7 +60,7 @@ export class AuthResolver {
       `${process.env.FRONTEND}/confirmAccount/${emailToken}`
     );
 
-    return { success: true };
+    return true;
   }
 
   @Mutation(() => UserResponse)
@@ -124,38 +123,34 @@ export class AuthResolver {
     };
   }
 
-  @Mutation(() => SuccessResponse)
-  async logOut(@Ctx() ctx: Context): Promise<SuccessResponse> {
+  @Mutation(() => Boolean)
+  async logOut(@Ctx() ctx: Context): Promise<boolean> {
     ctx.req.session.destroy((err) => {
       if (err) {
-        return {
-          success: false,
-        };
+        return false;
       }
     });
 
-    return {
-      success: true,
-    };
+    return true;
   }
 
-  @Mutation(() => SuccessResponse)
-  async confirmAccount(emailToken: string): Promise<SuccessResponse> {
+  @Mutation(() => Boolean)
+  async confirmAccount(emailToken: string): Promise<boolean> {
     const userId = await redis.get(emailToken);
 
     if (!userId) {
-      return { success: false };
+      return false;
     }
 
     await User.update({ id: parseInt(userId) }, { verified: true });
 
     redis.del(emailToken);
 
-    return { success: true };
+    return true;
   }
 
-  @Mutation(() => SuccessResponse)
-  async resetPassword(@Arg('email') email: string): Promise<SuccessResponse> {
+  @Mutation(() => Boolean)
+  async resetPassword(@Arg('email') email: string): Promise<boolean> {
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -173,18 +168,18 @@ export class AuthResolver {
       `${process.env.FRONTEND}/resetPassword/${resetPasswordToken}`
     );
 
-    return { success: true };
+    return true;
   }
 
-  @Mutation(() => SuccessResponse)
+  @Mutation(() => Boolean)
   async confirmResetPassword(
     @Arg('newPassword') newPassword: string,
     @Arg('resetPasswordToken') resetPasswordToken: string
-  ): Promise<SuccessResponse> {
+  ): Promise<boolean> {
     const userId = await redis.get(resetPasswordToken);
 
     if (!userId) {
-      return { success: false };
+      return false;
     }
 
     const hashPassword = bcrypt.hashSync(newPassword, 12);
@@ -193,6 +188,6 @@ export class AuthResolver {
 
     await redis.del(resetPasswordToken);
 
-    return { success: true };
+    return true;
   }
 }
