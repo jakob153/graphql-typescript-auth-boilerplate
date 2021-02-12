@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import { Arg, Ctx, Mutation, Resolver } from 'type-graphql';
+import { Arg, Ctx, Mutation, Resolver, Query } from 'type-graphql';
 import { UserInputError, AuthenticationError } from 'apollo-server-express';
 import { v4 as uuid } from 'uuid';
 import { validateOrReject } from 'class-validator';
@@ -103,6 +103,32 @@ export class AuthResolver {
     };
   }
 
+  @Query(() => UserResponse)
+  async checkSession(@Ctx() ctx: Context): Promise<UserResponse> {
+    if (!ctx.req.session.userId) {
+      throw new AuthenticationError('No Session found');
+    }
+
+    const user = await User.findOne({
+      id: ctx.req.session.userId,
+    });
+
+    if (!user) {
+      throw new UserInputError('User not found');
+    }
+
+    if (!user.verified) {
+      throw new AuthenticationError('User not verified');
+    }
+
+    return {
+      user: {
+        username: user.username,
+        email: user.email,
+      },
+    };
+  }
+
   @Mutation(() => SuccessResponse)
   async logOut(@Ctx() ctx: Context): Promise<SuccessResponse> {
     ctx.req.session.destroy((err) => {
@@ -134,11 +160,8 @@ export class AuthResolver {
   }
 
   @Mutation(() => SuccessResponse)
-  async resetPassword(
-    @Arg('username') username: string,
-    @Arg('email') email: string
-  ): Promise<SuccessResponse> {
-    const user = await User.findOne({ email, username });
+  async resetPassword(@Arg('email') email: string): Promise<SuccessResponse> {
+    const user = await User.findOne({ email });
 
     if (!user) {
       throw new UserInputError('User not found');
