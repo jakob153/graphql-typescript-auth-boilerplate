@@ -12,10 +12,6 @@ import { redis } from './redis';
 import { AuthResolver } from './resolvers/AuthResolver';
 import { BookResolver } from './resolvers/BookResolver';
 
-import { confirmAccount } from './rest/confirmAccount';
-import { resetPassword } from './rest/resetPassword';
-import { confirmResetPassword } from './rest/confirmResetPassword';
-
 declare module 'express-session' {
   interface SessionData {
     userId: number;
@@ -48,10 +44,6 @@ const corsOptions =
       saveUninitialized: false,
     })
   );
-
-  app.get('/confirmAccount/:emailToken', confirmAccount);
-  app.get('/resetPassword/:resetPasswordToken', resetPassword);
-  app.post('/resetPassword/:resetPasswordToken', confirmResetPassword);
 
   const dbOptions = await getConnectionOptions(process.env.NODE_ENV);
 

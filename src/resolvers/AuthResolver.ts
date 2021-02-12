@@ -119,6 +119,21 @@ export class AuthResolver {
   }
 
   @Mutation(() => SuccessResponse)
+  async confirmAccount(emailToken: string): Promise<SuccessResponse> {
+    const userId = await redis.get(emailToken);
+
+    if (!userId) {
+      return { success: false };
+    }
+
+    await User.update({ id: parseInt(userId) }, { verified: true });
+
+    redis.del(emailToken);
+
+    return { success: true };
+  }
+
+  @Mutation(() => SuccessResponse)
   async resetPassword(
     @Arg('username') username: string,
     @Arg('email') email: string
@@ -144,6 +159,26 @@ export class AuthResolver {
     };
 
     await sendMail(mail, contextData);
+
+    return { success: true };
+  }
+
+  @Mutation(() => SuccessResponse)
+  async confirmResetPassword(
+    @Arg('newPassword') newPassword: string,
+    @Arg('resetPasswordToken') resetPasswordToken: string
+  ): Promise<SuccessResponse> {
+    const userId = await redis.get(resetPasswordToken);
+
+    if (!userId) {
+      return { success: false };
+    }
+
+    const hashPassword = bcrypt.hashSync(newPassword, 12);
+
+    await User.update({ id: parseInt(userId) }, { password: hashPassword });
+
+    await redis.del(resetPasswordToken);
 
     return { success: true };
   }
