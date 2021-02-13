@@ -57,7 +57,7 @@ export class AuthResolver {
       user.email,
       'Welcome to Corperation',
       'confirmAccount',
-      `${process.env.FRONTEND}/confirmAccount/${emailToken}`
+      `${process.env.FRONTEND}?confirmAccount=${emailToken}`
     );
 
     return true;
@@ -135,7 +135,9 @@ export class AuthResolver {
   }
 
   @Mutation(() => Boolean)
-  async confirmAccount(emailToken: string): Promise<boolean> {
+  async confirmAccount(
+    @Arg('emailToken') emailToken: string
+  ): Promise<boolean> {
     const userId = await redis.get(`emailToken: ${emailToken}`);
 
     if (!userId) {
