@@ -48,10 +48,10 @@ export class AuthResolver {
 
     await user.save();
 
-    const emailToken = `emailToken: ${uuid()}`;
+    const emailToken = uuid();
 
     // expire in 900 seconds = 15 Minutes
-    redis.set(emailToken, user.id, 'EX', 900);
+    redis.set(`emailToken: ${uuid()}`, user.id, 'EX', 900);
 
     sendMail(
       user.email,
@@ -150,33 +150,35 @@ export class AuthResolver {
   }
 
   @Mutation(() => Boolean)
-  async resetPassword(@Arg('email') email: string): Promise<boolean> {
+  async sendChangePasswordMail(@Arg('email') email: string): Promise<boolean> {
     const user = await User.findOne({ email });
 
     if (!user) {
       throw new UserInputError('User not found');
     }
 
-    const resetPasswordToken = `resetPasswordToken: ${uuid()}`;
+    const changePasswordToken = uuid();
 
-    await redis.set(resetPasswordToken, user.id, 'EX', 900);
+    await redis.set(`changePasswordToken: ${uuid()}`, user.id, 'EX', 900);
 
     await sendMail(
       user.email,
       'Reset Password',
       'resetPassword',
-      `${process.env.FRONTEND}/resetPassword/${resetPasswordToken}`
+      `${process.env.FRONTEND}/changePassword/${changePasswordToken}`
     );
 
     return true;
   }
 
   @Mutation(() => Boolean)
-  async confirmResetPassword(
+  async changePassword(
     @Arg('newPassword') newPassword: string,
-    @Arg('resetPasswordToken') resetPasswordToken: string
+    @Arg('changePasswordToken') changePasswordToken: string
   ): Promise<boolean> {
-    const userId = await redis.get(`resetPasswordToken: ${resetPasswordToken}`);
+    const userId = await redis.get(
+      `changePasswordToken: ${changePasswordToken}`
+    );
 
     if (!userId) {
       return false;
@@ -186,7 +188,7 @@ export class AuthResolver {
 
     await User.update({ id: parseInt(userId) }, { password: hashPassword });
 
-    await redis.del(resetPasswordToken);
+    await redis.del(changePasswordToken);
 
     return true;
   }
