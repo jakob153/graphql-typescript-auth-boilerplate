@@ -27,9 +27,7 @@ export class AuthResolver {
     });
 
     if (existingUser.length) {
-      throw new UserInputError('Invalid Email/Password', {
-        email: 'email already taken',
-      });
+      throw new UserInputError('Email/Username already taken');
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);

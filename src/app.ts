@@ -1,7 +1,6 @@
 import express from 'express';
 import session from 'express-session';
 import connectRedis from 'connect-redis';
-import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { createConnection, getConnectionOptions } from 'typeorm';
 import { ApolloServer } from 'apollo-server-express';
