@@ -7,7 +7,7 @@ export const verifySession: MiddlewareFn<Context> = async (
   { context: ctx },
   next
 ) => {
-  if (ctx.req.session.id) {
+  if (ctx.req.session.userId) {
     return next();
   } else {
     throw new AuthenticationError('Not Authenticated');
