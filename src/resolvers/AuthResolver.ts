@@ -49,7 +49,7 @@ export class AuthResolver {
     const emailToken = uuid();
 
     // expire in 900 seconds = 15 Minutes
-    redis.set(`emailToken: ${uuid()}`, user.id, 'EX', 900);
+    await redis.set(`emailToken: ${emailToken}`, user.id, 'EX', 900);
 
     sendMail(
       user.email,
@@ -159,7 +159,12 @@ export class AuthResolver {
 
     const changePasswordToken = uuid();
 
-    await redis.set(`changePasswordToken: ${uuid()}`, user.id, 'EX', 900);
+    await redis.set(
+      `changePasswordToken: ${changePasswordToken}`,
+      user.id,
+      'EX',
+      900
+    );
 
     await sendMail(
       user.email,
