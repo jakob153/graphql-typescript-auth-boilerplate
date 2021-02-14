@@ -28,7 +28,6 @@ const corsOptions =
   const redisStore = connectRedis(session);
   const maxDaysOfSession = 60;
 
-  app.use(cors(corsOptions));
   app.use(cookieParser());
   app.use(express.json());
   app.use(
