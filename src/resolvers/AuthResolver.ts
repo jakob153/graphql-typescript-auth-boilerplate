@@ -6,7 +6,8 @@ import { validateOrReject } from 'class-validator';
 
 import { redis } from '../redis';
 
-import { User } from '../entity/User';
+import { DI } from '../app';
+import { User } from '../entities/User';
 
 import { sendMail } from '../mails/sendMail';
 
@@ -22,21 +23,17 @@ export class AuthResolver {
     @Arg('email') email: string,
     @Arg('password') password: string
   ): Promise<boolean> {
-    const existingUser = await User.find({
-      where: [{ username }, { email }],
+    const existingUser = await DI.userRepository.findOne({
+      $or: [{ username }, { email }],
     });
 
-    if (existingUser.length) {
+    if (existingUser) {
       throw new UserInputError('Email/Username already taken');
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    const user = User.create({
-      username,
-      email,
-      password: hashedPassword,
-    });
+    const user = new User(username, email, hashedPassword);
 
     try {
       await validateOrReject(user);
@@ -44,7 +41,7 @@ export class AuthResolver {
       return false;
     }
 
-    await user.save();
+    await DI.userRepository.persistAndFlush(user);
 
     const emailToken = uuid();
 
@@ -67,8 +64,8 @@ export class AuthResolver {
     @Arg('password') password: string,
     @Ctx() ctx: Context
   ): Promise<UserResponse> {
-    const [user] = await User.find({
-      where: [{ username: usernameOrEmail }, { email: usernameOrEmail }],
+    const user = await DI.userRepository.findOne({
+      $or: [{ username: usernameOrEmail }, { email: usernameOrEmail }],
     });
 
     if (!user) {
@@ -101,7 +98,7 @@ export class AuthResolver {
       throw new AuthenticationError('No Session found');
     }
 
-    const user = await User.findOne({
+    const user = await DI.userRepository.findOne({
       id: ctx.req.session.userId,
     });
 
@@ -142,7 +139,15 @@ export class AuthResolver {
       return false;
     }
 
-    await User.update({ id: parseInt(userId) }, { verified: true });
+    const user = await DI.userRepository.findOne(parseInt(userId));
+
+    if (!user) {
+      return false;
+    }
+
+    user.verified = true;
+
+    await DI.userRepository.flush();
 
     redis.del(emailToken);
 
@@ -151,7 +156,7 @@ export class AuthResolver {
 
   @Mutation(() => Boolean)
   async sendChangePasswordMail(@Arg('email') email: string): Promise<boolean> {
-    const user = await User.findOne({ email });
+    const user = await DI.userRepository.findOne({ email });
 
     if (!user) {
       throw new UserInputError('User not found');
@@ -189,9 +194,16 @@ export class AuthResolver {
       return false;
     }
 
-    const hashPassword = bcrypt.hashSync(newPassword, 12);
+    const user = await DI.userRepository.findOne(parseInt(userId));
 
-    await User.update({ id: parseInt(userId) }, { password: hashPassword });
+    if (!user) {
+      return false;
+    }
+
+    const hashPassword = bcrypt.hashSync(newPassword, 12);
+    user.password = hashPassword;
+
+    await DI.userRepository.flush();
 
     await redis.del(changePasswordToken);
 

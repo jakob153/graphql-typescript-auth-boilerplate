@@ -2,11 +2,13 @@ import express from 'express';
 import session from 'express-session';
 import connectRedis from 'connect-redis';
 import cookieParser from 'cookie-parser';
-import { createConnection, getConnectionOptions } from 'typeorm';
+import { EntityManager, EntityRepository, MikroORM } from '@mikro-orm/core';
 import { ApolloServer } from 'apollo-server-express';
 import { buildSchema } from 'type-graphql';
 
 import { redis } from './redis';
+
+import { User } from './entities/User';
 
 import { AuthResolver } from './resolvers/AuthResolver';
 import { BookResolver } from './resolvers/BookResolver';
@@ -17,10 +19,11 @@ declare module 'express-session' {
   }
 }
 
-const corsOptions =
-  process.env.NODE_ENV === 'development'
-    ? { credentials: true, origin: process.env.FRONTEND }
-    : { credentials: true };
+export const DI = {} as {
+  orm: MikroORM;
+  em: EntityManager;
+  userRepository: EntityRepository<User>;
+};
 
 (async () => {
   const app = express();
@@ -43,9 +46,14 @@ const corsOptions =
     })
   );
 
-  const dbOptions = await getConnectionOptions(process.env.NODE_ENV);
-
-  await createConnection({ ...dbOptions, name: 'default' });
+  DI.orm = await MikroORM.init({
+    entities: ['./entities/**/*.ts'],
+    dbName: process.env.NODE_ENV,
+    type: 'sqlite',
+    debug: true,
+  });
+  DI.userRepository = DI.orm.em.getRepository(User);
+  DI.em = DI.orm.em;
 
   const port = process.env.PORT || 4000;
 
@@ -59,6 +67,11 @@ const corsOptions =
     context: ({ req, res }) => ({ req, res }),
     debug: false,
   });
+
+  const corsOptions =
+    process.env.NODE_ENV === 'development'
+      ? { credentials: true, origin: process.env.FRONTEND }
+      : { credentials: true };
 
   apolloServer.applyMiddleware({
     app,

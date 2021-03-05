@@ -1,5 +1,5 @@
 import { ObjectType, Field } from 'type-graphql';
-import { User } from '../entity/User';
+import { User } from '../entities/User';
 
 interface UserResponseData {
   username: string;
