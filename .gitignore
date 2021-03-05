@@ -1,5 +1,5 @@
 /node_modules
 /dist
-database.sqlite
-.env.development
-.env.production
+/development
+/.env.development
+/.env.production

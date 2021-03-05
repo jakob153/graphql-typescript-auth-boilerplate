@@ -47,13 +47,17 @@ export const DI = {} as {
   );
 
   DI.orm = await MikroORM.init({
-    entities: ['./entities/**/*.ts'],
+    entities: ['./dist/entities/**/*.js'],
+    entitiesTs: ['./src/entities/**/*.ts'],
     dbName: process.env.NODE_ENV,
     type: 'sqlite',
     debug: true,
   });
   DI.userRepository = DI.orm.em.getRepository(User);
   DI.em = DI.orm.em;
+
+  const generator = DI.orm.getSchemaGenerator();
+  await generator.updateSchema();
 
   const port = process.env.PORT || 4000;
 
